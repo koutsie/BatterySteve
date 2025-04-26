@@ -4,10 +4,57 @@
 -- Fedi/Mastodon: https://layer8.space/@k
 -- Report is saved as score.old.txt
 
-
-collectgarbage()
 Font = font.load("tiny.pgf")
 font.setdefault(Font)
+
+-- custom splash
+local splash = image.loadv("splash.png")
+local fade_steps = 50
+local alpha = 0
+local direction = 1
+local wait_time = 8000       -- Total wait time in milliseconds
+local wait_start = os.time() -- Record the start time
+
+while true do
+    buttons.read()
+    if buttons.start or buttons.cross or buttons.circle then
+        break
+    end
+
+    alpha = alpha + direction * (255 / fade_steps)
+    if alpha >= 255 then
+        alpha = 255
+        direction = 0
+    elseif alpha <= 0 then
+        break
+    end
+
+    image.blit(splash, 0, 0, alpha)
+    if direction == 0 then
+        screen.consolexy(31, 32)
+        screen.consoleprint("Press START, X, or CIRCLE to skip")
+        screen.flip()
+        while os.time() - wait_start < wait_time do
+            buttons.read()
+            if buttons.start or buttons.cross or buttons.circle then
+                break
+            end
+            os.delay(16)
+        end
+        break
+    end
+    screen.flip()
+    os.delay(16)
+end
+
+if alpha == 255 then
+    for i = 255, 0, -5 do
+        image.blit(splash, 0, 0, i)
+        screen.flip()
+        os.delay(16)
+    end
+end
+
 
 local batt                 = require("batt")
 local draw                 = require("draw")
@@ -17,6 +64,7 @@ local model3d              = require("model3d")
 local os, io, math, string = os, io, math, string
 
 os.cpu(333)
+collectgarbage()
 
 local eqA, eqB, eqC, eqD                 = 3.14, -2.98743, 19.5, 100
 local battPct                            = 100
@@ -164,21 +212,30 @@ while true do
     amg.mode2d(1)
     screen.clear(color.new(20, 20, 20))
     local pct = batt.lifepercent() or 0
-    screen.print(240, 120, "Charge to 100%", 0.6, color.new(200, 200, 200))
-    if pct == 100 then
-        screen.print(240, 150, "Unplug your charger!", 0.5, color.new(200, 200, 200))
-        screen.print(240, 180, "Press START to begin.", 0.5, color.new(200, 200, 200))
-        buttons.read()
-        if buttons.start then break end
+    local isCharging = batt.charging()
+
+    if pct < 100 then
+        screen.print(240, 120, "Charge to 100%", 0.6, color.new(200, 200, 200))
+    elseif pct >= 100 then
+        if isCharging then
+            screen.print(240, 150, "Unplug your charger!", 0.5, color.new(200, 200, 200))
+        else
+            screen.print(240, 180, "Press START to begin.", 0.5, color.new(200, 200, 200))
+            buttons.read()
+            if buttons.start then break end
+        end
     end
-    screen.consolexy(0, 0)
-    screen.consoleprint("chargescreen")
+
+    screen.consolexy(1, 1)
+    screen.consoleprint("BatterySteve 1.0 by Koutsie")
+    screen.consolexy(1, 2)
+    screen.consoleprint("https://the-sauna.icu/BatterySteve/")
     screen.flip()
-    os.delay(66)
+    os.delay(32)
 end
 
 local aaa, lastLog, fps, elapsedSeconds, lastUpdateTime = os.time(), os.time(), 0, 0, os.time()
-local o = 0                             -- offset
+local o = 0 -- offset
 while true do
     screen.clear(color.new(20, 20, 20))
     buttons.read()
@@ -186,7 +243,7 @@ while true do
 
     cam3d.set(Camera)
     amg.light(1, 1)
-    amg.light(2, 1)
+    amg.light(1, 10)
 
     BallRotX, BallRotY, BallRotZ = BallRotX + BallRotSpeedX, BallRotY + BallRotSpeedY,
         BallRotZ + BallRotSpeedZ
@@ -291,8 +348,6 @@ while true do
         0.5,
         color.new(200, 200, 200)
     )
-
-
 
     local battLevel = tonumber(string.match(battPct, "(%d+)") or "0")
     local barW = math.max(5, 256 * battLevel / 100)

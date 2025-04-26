@@ -1,9 +1,11 @@
 Notes for OneLua developers:
-- It seems that 3D Models need to have (proper) materials
-- Images must be 8-Bit, not 16-Bit (convert original.png -colors 235 -o fixed.png)
-- Eboots can edited with PSP Brew
+- It seems that 3D Models need to have (proper) materials.
+- Images must be 8-Bit, not 16-Bit (convert original.png -colors 235 -o fixed.png).
+- Eboots can edited with PSP Brew.
+- "ATRACTool-Reloaded" might come with the needed AT3 conversion utilities.
 
 
 Thanks to the Onelua Team.
+Check out the PSP Homebrew Community: https://discord.gg/bePrj9W
 Shoutouts to Quadruple for being a rubber duck debugger.
-Special thanks to my partner for their support <3
+Special thanks to Pinja for their support <3
