@@ -1,0 +1,9 @@
+Notes for OneLua developers:
+- It seems that 3D Models need to have (proper) materials
+- Images must be 8-Bit, not 16-Bit (convert original.png -colors 235 -o fixed.png)
+- Eboots can edited with PSP Brew
+
+
+Thanks to the Onelua Team.
+Shoutouts to Quadruple for being a rubber duck debugger.
+Special thanks to my partner for their support <3
