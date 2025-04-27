@@ -344,9 +344,17 @@ while true do
     end
 
     draw.fillrect(0, 0, 480, 20, color.new(40, 40, 40))
+    local tempStr
+    if hw.getmodel() == "Go" then
+        tempStr = ""
+    elseif hw.getmodel() == "Street" then
+        tempStr = ""
+    else
+        tempStr = " TEMP: " .. battTemp .. "*C"
+    end
+
     screen.print(5, 8,
-        "BATT: " .. battPct ..
-        (hw.getmodel() == "Go" or hw.getmodel() == "Street" and "" or " TEMP: " .. battTemp .. "*C") ..
+        "BATT: " .. battPct .. tempStr ..
         " | RAM: " .. string.format("%05.2f", os.ram() / 1048576) ..
         " MB / " .. string.format("%05.2f", os.totalram() / 1048576) ..
         " MB",
@@ -416,17 +424,25 @@ while true do
     local batremain = tostring(batt.remaincap()) .. "/" .. tostring(batt.fullcap())
     local batvolt   = batt.volt()
 
-    -- if model is hw.getmodel() is Go or Street we need to hide batremain
-    -- those models do not have proper battery managment
+    -- if model is Go, Street or Emulator we need to hide batremain
+    -- those models do not have proper battery management
+    local model      = hw.getmodel()
+
+    -- build battery string safely
+    local batteryStr = ""
+    if model ~= "Go" and model ~= "Street" and model ~= "Emulator" then
+        batteryStr = string.format("BAT: %s (%s) ", batremain, batvolt)
+    end
+
     screen.print(5, 258,
-        string.format("FPS:%d RUN:%s %s| %s %s",
+        string.format(
+            "FPS:%d RUN:%s %s| %s %s",
             fps,
             timeString,
-            (hw.getmodel() ~= "Go" and hw.getmodel() ~= "Street" and hw.getmodel() ~= "Emulator") and
-            string.format("BAT: %s (%s) ", batremain, batvolt) or
-            "",
+            batteryStr,
             hwgen,
-            model),
+            model
+        ),
         0.40,
         color.new(200, 200, 200)
     )
