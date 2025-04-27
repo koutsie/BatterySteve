@@ -10,7 +10,7 @@
 Font = font.load("tiny.pgf")
 font.setdefault(Font)
 
-local BSV = "1.0.2"
+local BSV = "1.0.3"
 
 -- custom splashes
 local splashes = { "splash.png", "pspunk.png" }
@@ -244,7 +244,7 @@ while true do
 end
 
 local lastLog, fps, elapsedSeconds, lastUpdateTime = os.time(), 0, 0, os.time()
-local o = 0 -- offset
+local o = 0                                                                             -- offset
 while true do
     screen.clear(color.new(20, 20, 20))
     buttons.read()
@@ -345,10 +345,10 @@ while true do
 
     draw.fillrect(0, 0, 480, 20, color.new(40, 40, 40))
     screen.print(5, 8,
-        "BATT: " .. battPct .. " TEMP: " .. battTemp .. "*C | RAM: " ..
-        string.format("%05.2f", os.ram() / 1048576) ..
-        " MB / " ..
-        string.format("%05.2f", os.totalram() / 1048576) ..
+        "BATT: " .. battPct ..
+        (hw.getmodel() == "Go" or hw.getmodel() == "Street" and "" or " TEMP: " .. battTemp .. "*C") ..
+        " | RAM: " .. string.format("%05.2f", os.ram() / 1048576) ..
+        " MB / " .. string.format("%05.2f", os.totalram() / 1048576) ..
         " MB",
         0.5,
         color.new(200, 200, 200)
@@ -422,7 +422,8 @@ while true do
         string.format("FPS:%d RUN:%s %s| %s %s",
             fps,
             timeString,
-            (hw.getmodel() ~= "Go" and hw.getmodel() ~= "Street" and hw.getmodel() ~= "Emulator") and string.format("BAT: %s (%s) ", batremain, batvolt) or
+            (hw.getmodel() ~= "Go" and hw.getmodel() ~= "Street" and hw.getmodel() ~= "Emulator") and
+            string.format("BAT: %s (%s) ", batremain, batvolt) or
             "",
             hwgen,
             model),
