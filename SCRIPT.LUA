@@ -51,6 +51,11 @@ for i = 1, #splashes do
     end
 end
 
+if hw.getmodel() == "Vita" then
+    screen.consoleprint("The PS Vita is not supported.")
+    os.delay(5000)
+    os.exit()
+end
 
 local batt                 = require("batt")
 local draw                 = require("draw")
@@ -74,8 +79,10 @@ local particleMinSpeed, particleMaxSpeed = -2, 2
 local particleRadius                     = 1
 local logInterval                        = 30
 local logFileName                        = "score.txt"
+local logFileNameBak                     = "score_bak.txt"
 local frameCounter                       = 0
 local calcInterval                       = 5
+local lastBackup                         = os.time()
 
 local half                               = cubeSize / 2
 local baseVerts                          = {
@@ -210,8 +217,8 @@ while true do
     local isCharging = batt.charging()
 
     if pct < 100 then
-        screen.print(240, 120, "Charge to 100%", 0.6, color.new(200, 200, 200))
-        screen.print(200, 140, "Force start [" .. pct .. "%] by pressing Select", 0.4, color.new(42, 32, 16))
+        screen.print(240, 120, "Charge to 100%", 0.6, color.new(222, 222, 222))
+        screen.print(200, 140, "Force start [" .. pct .. "%] by pressing Select", 0.4, color.new(50, 42, 24))
         buttons.read()
         if buttons.select then break end
     elseif pct >= 100 then
@@ -349,9 +356,9 @@ while true do
 
     local battLevel = tonumber(string.match(battPct, "(%d+)") or "0")
     local barColor
-    if battLevel > 45 then
+    if battLevel > 80 then
         barColor = color.new(50, 200, 50)
-    elseif battLevel > 20 then
+    elseif battLevel > 45 then
         barColor = color.new(200, 200, 50)
     else
         barColor = color.new(200, 50, 50)
@@ -408,8 +415,17 @@ while true do
     local model     = (cfw ~= "UNK") and tostring(hw.getmodel() .. " on " .. cfw) or tostring(hw.getmodel())
     local batremain = tostring(batt.remaincap()) .. "/" .. tostring(batt.fullcap())
     local batvolt   = batt.volt()
+
+    -- if model is hw.getmodel() is Go or Street we need to hide batremain
+    -- those models do not have proper battery managment
     screen.print(5, 258,
-        string.format("FPS:%d RUN:%s BAT: %s (%s)| %s %s", fps, timeString, batremain, batvolt, hwgen, model),
+        string.format("FPS:%d RUN:%s %s| %s %s",
+            fps,
+            timeString,
+            (hw.getmodel() ~= "Go" and hw.getmodel() ~= "Street" and hw.getmodel() ~= "Emulator") and string.format("BAT: %s (%s) ", batremain, batvolt) or
+            "",
+            hwgen,
+            model),
         0.40,
         color.new(200, 200, 200)
     )
@@ -430,6 +446,15 @@ while true do
             power.tick()
         end
         lastLog = os.time()
+    end
+
+    -- apparently some batteries will *die* randomly?
+    -- lets keep a second copy for future reference
+    if os.time() - lastBackup >= 31 then
+        if copyFile(logFileName, "score.old.bak.txt") then
+            -- line intentionally left empty
+        end
+        lastBackup = os.time()
     end
 
     screen.flip()
