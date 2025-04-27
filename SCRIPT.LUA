@@ -1,5 +1,6 @@
--- BatterySteve 1.0.1
+-- BatterySteve PSP
 -- by Koutsie
+
 -- Homeage: https://the-sauna.icu/BatterySteve/
 -- Fedi/Mastodon: https://layer8.space/@k
 -- Report is saved as score.old.txt
@@ -8,6 +9,8 @@
 
 Font = font.load("tiny.pgf")
 font.setdefault(Font)
+
+local BSV = "1.0.2"
 
 -- custom splashes
 local splashes = { "splash.png", "pspunk.png" }
@@ -208,6 +211,9 @@ while true do
 
     if pct < 100 then
         screen.print(240, 120, "Charge to 100%", 0.6, color.new(200, 200, 200))
+        screen.print(200, 140, "Force start [" .. pct .. "%] by pressing Select", 0.4, color.new(42, 32, 16))
+        buttons.read()
+        if buttons.select then break end
     elseif pct >= 100 then
         if isCharging then
             screen.print(240, 150, "Unplug your charger!", 0.5, color.new(200, 200, 200))
@@ -219,7 +225,7 @@ while true do
     end
 
     screen.consolexy(1, 1)
-    screen.consoleprint("BatterySteve 1.0.1 by Koutsie")
+    screen.consoleprint("BatterySteve" .. BSV .. " by Koutsie")
     screen.consolexy(1, 2)
     screen.consoleprint("https://the-sauna.icu/BatterySteve/")
     local clocks = tostring(hw.pommel() ..
