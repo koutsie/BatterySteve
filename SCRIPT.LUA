@@ -1,57 +1,50 @@
--- BatterySteve 1.0
+-- BatterySteve 1.0.1
 -- by Koutsie
--- Homeage: https://the-sauna.icu/batterysteve/
+-- Homeage: https://the-sauna.icu/BatterySteve/
 -- Fedi/Mastodon: https://layer8.space/@k
 -- Report is saved as score.old.txt
+
+-- OneLuas CFW "detection" is very very broken.
 
 Font = font.load("tiny.pgf")
 font.setdefault(Font)
 
--- custom splash
-local splash = image.loadv("splash.png")
-local fade_steps = 50
-local alpha = 0
-local direction = 1
-local wait_time = 8000       -- Total wait time in milliseconds
-local wait_start = os.time() -- Record the start time
+-- custom splashes
+local splashes = { "splash.png", "pspunk.png" }
+local fade_steps, delay = 25, 16
+local display_time = 6000
 
-while true do
-    buttons.read()
-    if buttons.start or buttons.cross or buttons.circle then
-        break
-    end
-
-    alpha = alpha + direction * (255 / fade_steps)
-    if alpha >= 255 then
-        alpha = 255
-        direction = 0
-    elseif alpha <= 0 then
-        break
-    end
-
-    image.blit(splash, 0, 0, alpha)
-    if direction == 0 then
-        screen.consolexy(31, 32)
-        screen.consoleprint("Press START, X, or CIRCLE to skip")
+for i = 1, #splashes do
+    local p = splashes[i]
+    local img = image.load(p)
+    if not img then
+        os.message("Failed to load " .. p)
+    else
+        screen.clear(0)
         screen.flip()
-        while os.time() - wait_start < wait_time do
+        for j = 0, fade_steps do
+            local a = math.floor((j / fade_steps) * 255)
+            image.blit(img, 0, 0, a)
+            screen.flip()
+            os.delay(delay)
+        end
+        local start = os.time()
+        while os.time() - start < display_time / 1000 do
             buttons.read()
-            if buttons.start or buttons.cross or buttons.circle then
+            if buttons.cross or buttons.circle or buttons.triangle or buttons.square or buttons.start or buttons.select then
                 break
             end
-            os.delay(16)
+            image.blit(img, 0, 0, 255)
+            screen.print(350, 10, "Press any button to skip.", 0.25, color.new(255, 255, 255))
+            screen.flip()
+            os.delay(delay)
         end
-        break
-    end
-    screen.flip()
-    os.delay(16)
-end
-
-if alpha == 255 then
-    for i = 255, 0, -5 do
-        image.blit(splash, 0, 0, i)
-        screen.flip()
-        os.delay(16)
+        for j = fade_steps, 0, -1 do
+            local a = math.floor((j / fade_steps) * 255)
+            image.blit(img, 0, 0, a)
+            screen.flip()
+            os.delay(delay)
+        end
     end
 end
 
@@ -63,8 +56,8 @@ local cam3d                = require("cam3d")
 local model3d              = require("model3d")
 local os, io, math, string = os, io, math, string
 
-os.cpu(333)
 collectgarbage()
+os.cpu(333)
 
 local eqA, eqB, eqC, eqD                 = 3.14, -2.98743, 19.5, 100
 local battPct                            = 100
@@ -80,7 +73,6 @@ local logInterval                        = 30
 local logFileName                        = "score.txt"
 local frameCounter                       = 0
 local calcInterval                       = 5
-local eqVal                              = 0
 
 local half                               = cubeSize / 2
 local baseVerts                          = {
@@ -189,7 +181,7 @@ for i = 1, particleCount do
     }
 end
 screen.consoleprint("init done")
-eqVal = calculateEquation(battPct)
+EqVal = calculateEquation(battPct)
 
 local function copyFile(source, dest)
     local inFile = io.open(source, "rb")
@@ -227,14 +219,18 @@ while true do
     end
 
     screen.consolexy(1, 1)
-    screen.consoleprint("BatterySteve 1.0 by Koutsie")
+    screen.consoleprint("BatterySteve 1.0.1 by Koutsie")
     screen.consolexy(1, 2)
     screen.consoleprint("https://the-sauna.icu/BatterySteve/")
+    local clocks = tostring(hw.pommel() ..
+        ":" .. hw.board() .. ":" .. os.cpu() .. ":" .. tostring(batt.exists() and "1" or "0"))
+    screen.consolexy(1, 3)
+    screen.consoleprint(clocks)
     screen.flip()
     os.delay(32)
 end
 
-local aaa, lastLog, fps, elapsedSeconds, lastUpdateTime = os.time(), os.time(), 0, 0, os.time()
+local lastLog, fps, elapsedSeconds, lastUpdateTime = os.time(), 0, 0, os.time()
 local o = 0 -- offset
 while true do
     screen.clear(color.new(20, 20, 20))
@@ -288,11 +284,7 @@ while true do
 
     fps              = screen.fps()
     battPct          = batt.lifepercent() or 0
-    battPct          = batt.lifepercent() or 0
-    local battChg    = batt.charging() and "Yes" or "No"
-    local battTemp   = batt.temp() or 0
     local remainCap  = batt.remaincap()
-    local fullCap    = batt.fullcap()
 
     -- very bad way of testing if battery cap is done for lol
     if (battPct == 0 and (remainCap == "-" or remainCap == nil)) then
@@ -326,16 +318,16 @@ while true do
                 end
                 break
             end
-            os.delay(100)
+            os.delay(16)
         end
         break
     end
-    local battChg  = batt.charging() and "Yes" or "No"
+
     local battTemp = batt.temp() or 0
 
     frameCounter   = frameCounter + 1
     if frameCounter >= calcInterval then
-        eqVal, frameCounter = calculateEquation(battPct), 0
+        EqVal, frameCounter = calculateEquation(battPct), 0
     end
 
     draw.fillrect(0, 0, 480, 20, color.new(40, 40, 40))
@@ -350,7 +342,6 @@ while true do
     )
 
     local battLevel = tonumber(string.match(battPct, "(%d+)") or "0")
-    local barW = math.max(5, 256 * battLevel / 100)
     local barColor
     if battLevel > 45 then
         barColor = color.new(50, 200, 50)
@@ -360,7 +351,7 @@ while true do
         barColor = color.new(200, 50, 50)
     end
     draw.fillrect(5, 25, 100, 3, color.new(50, 50, 50))
-    draw.fillrect(5, 25, barW, 3, barColor)
+    draw.fillrect(5, 25, battLevel, 3, barColor)
     for _, p in ipairs(particles) do
         p.x, p.y = p.x + p.vx, p.y + p.vy
         if p.x < 0 or p.x > 480 then p.vx = -p.vx end
@@ -420,7 +411,7 @@ while true do
     if os.time() - lastLog >= logInterval then
         local f = io.open(logFileName, "a")
         if f then
-            local remainCap = tostring(batt.remaincap())
+            remainCap = tostring(batt.remaincap())
             local fullCap = tostring(batt.fullcap())
             f:write(os.date("%Y-%m-%d %H:%M:%S", os.time())
                 .. ", rt:" .. timeString
@@ -429,6 +420,7 @@ while true do
                 .. ", fps:" .. fps .. "\n"
             )
             f:close()
+            collectgarbage()
             power.tick()
         end
         lastLog = os.time()
