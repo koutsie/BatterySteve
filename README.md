@@ -2,6 +2,11 @@
 
 BatterySteve is a lightweight and easy-to-use tool designed to test the real capacity of your PSP battery. It eliminates the guesswork involved in determining how much power is left in your battery.
 
+![main screen](https://the-sauna.icu/BatterySteve/main.png)
+![finished run](https://the-sauna.icu/BatterySteve/outtabat.png)
+![xmb](https://the-sauna.icu/BatterySteve/xmb.png)
+
+
 ## Features
 
 - **Real Load Simulation**: Renders a 2D+3D scene to simulate a "real" load on the system.
