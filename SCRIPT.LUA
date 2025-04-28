@@ -10,7 +10,7 @@
 Font = font.load("tiny.pgf")
 font.setdefault(Font)
 
-local BSV = "1.0.3"
+local BSV = "1.0.3-E"
 
 -- custom splashes
 local splashes = { "splash.png", "pspunk.png" }
