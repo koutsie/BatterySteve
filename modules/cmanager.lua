@@ -7,6 +7,8 @@ do
             eastergg = false,
             cpu = 333,
             music = true,
+            extraload = false,
+            unreliablebattery = false,
         },
         autotest = {
             enabled = false

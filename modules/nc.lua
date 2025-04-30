@@ -2,21 +2,25 @@
 
 local nc = {}
 
-local function bigmsg(txt)
+function bigmsg(txt)
     local size, color_val = 2.0, color.new(2, 146, 199)
-    screen.print(150, 136, tostring(txt), size, color_val)
+    local textWidth = screen.textwidth(tostring(txt), size)
+    local textHeight = screen.textheight(size)
+    local screenWidth, screenHeight = 480, 272
+    local x = (screenWidth - textWidth) / 2
+    -- screen height is not / 2 because thats too high
+    local y = (screenHeight - textHeight) / 1.78
+    screen.print(x, y, tostring(txt), size, color_val)
 end
 
 function nc.run()
     local elapsed, interval = 0, 16
-    local downPressed = false
     while elapsed < 128 do
         screen.consolexy(1, 1)
         screen.consoleprint("hold down to check log")
         screen.flip()
         buttons.read()
         if buttons.down then
-            downPressed = true
             screen.clear(0, 0, 0)
             local lastLine = nil
             for _, filename in ipairs({
@@ -40,7 +44,10 @@ function nc.run()
             end
             bigmsg(lastRT)
             screen.consolexy(1, 1)
-            screen.consoleprint("v" .. BSV)
+            screen.consoleprint("v" .. BSV .. " | " .. hw.getmodel() .. "(" .. hw.gen() .. ", " .. hw.board() .. ")" or
+                " ")
+            screen.consolexy(42, 1)
+            screen.consoleprint("Totally Nuclear Kommandos!")
             screen.flip()
             -- halt the script forever, only exit on start.
             while true do

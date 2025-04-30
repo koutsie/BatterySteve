@@ -16,6 +16,7 @@ local logInterval = 30
 local eqA, eqB, eqD = 0.3, 0.2, 0.5
 local battPct = 100
 local cpuSpeed
+local unreliablebattery
 
 local cubeSize = 25
 local cubePosX, cubePosY = 240, 136
@@ -28,9 +29,6 @@ local particleRadius = 1
 local particles = {}
 local gValues = {}
 
-local frameCounter = 0
-local calcInterval = 3
-
 local intro, loop
 local musicenabled = nil
 local loopStarted = false
@@ -41,12 +39,14 @@ local loopStarted = false
 
 STEVE = false
 TEST = false
-BSV = "1.1.1"
+BSV = "1.1.2"
 
 -- run config manager
 config = require("modules/cmanager")
 
+
 musicenabled = config.batterysteve.music
+unreliablebattery = config.batterysteve.unreliablebattery
 cpuSpeed = config.batterysteve.cpu
 os.cpu(cpuSpeed)
 
@@ -195,19 +195,21 @@ models[1] = {
 }
 
 local function addModel(vertices, edges)
-    local scale = math.random(30, 60) / 100
+    local scale = math.random(30, 60) * 0.01
     local position = { x = math.random(0, 480), y = math.random(0, 272), z = 0 }
-    local velocity = { x = math.random(-1.2, 1.2), y = math.random(-1.2, 1.2) }
+    local velocity = {
+        x = math.random() * 2 - 1,
+        y = math.random() * 2 - 1
+    }
     local rotationSpeed = {
-        x = math.random() * 0.03,
-        y = math.random() * 0.03,
-        z = math.random() * 0.03
+        x = math.random() * 0.06,
+        y = math.random() * 0.06,
+        z = math.random() * 0.036
     }
     local colorBase = {
         math.random(50, 255), math.random(50, 255), math.random(50, 255)
     }
-
-    table.insert(models, {
+    models[#models + 1] = {
         verts = vertices,
         edges = edges,
         pos = position,
@@ -216,30 +218,57 @@ local function addModel(vertices, edges)
         scale = scale,
         vel = velocity,
         colorBase = colorBase
-    })
+    }
 end
 
 -- floaties
 addModel({
-    { 0, 40, 0 }, { -40, -40, 40 }, { 40, -40, 40 }, { 40, -40, -40 }, { -40, -40, -40 }
-}, { { 1, 2 }, { 1, 3 }, { 1, 4 }, { 1, 5 }, { 2, 3 }, { 3, 4 }, { 4, 5 }, { 5, 2 } })
--- pyramid
-addModel({
-    { 0, 0, 60 }, { 30, 30, 0 }, { -30, 30, 0 }, { -30, -30, 0 }, { 30, -30, 0 },
-    { 0, 0, -60 }
+    { -30, -30, 0 }, { 0, -40, 0 }, { 30, -30, 0 }, { 40, 0, 0 },
+    { 30,  30,  0 }, { 0, 40, 0 }, { -30, 30, 0 }, { -40, 0, 0 },
+    { -20, 10, 5 }, { -10, 10, 5 }, { -10, 20, 5 }, { -20, 20, 5 },
+    { 10,  10, 5 }, { 20, 10, 5 }, { 20, 20, 5 }, { 10, 20, 5 },
+    { -20, -10, 5 }, { -10, -20, 5 }, { 10, -20, 5 }, { 20, -10, 5 }
 }, {
-    { 1, 2 }, { 1, 3 }, { 1, 4 }, { 1, 5 }, { 2, 3 }, { 3, 4 }, { 4, 5 }, { 5, 2 }, { 6, 2 },
-    { 6, 3 }, { 6, 4 }, { 6, 5 }
+    { 1, 2 }, { 2, 3 }, { 3, 4 }, { 4, 5 }, { 5, 6 }, { 6, 7 }, { 7, 8 }, { 8, 1 },
+    { 9, 10 }, { 10, 11 }, { 11, 12 }, { 12, 9 },
+    { 13, 14 }, { 14, 15 }, { 15, 16 }, { 16, 13 },
+    { 17, 18 }, { 18, 19 }, { 19, 20 }
 })
--- cube
+
+-- hexa
 addModel({
-    { -half, -half, -half }, { half, -half, -half }, { half, half, -half },
-    { -half, half,  -half }, { -half, -half, half }, { half, -half, half },
-    { half, half, half }, { -half, half, half }
+    { 0, -30, 15 }, { 26, -15, 15 }, { 26, 15, 15 }, { 0, 30, 15 }, { -26, 15, 15 }, { -26, -15, 15 },
+    { 0, -30, -15 }, { 26, -15, -15 }, { 26, 15, -15 }, { 0, 30, -15 }, { -26, 15, -15 }, { -26, -15, -15 }
 }, {
-    { 1, 2 }, { 2, 3 }, { 3, 4 }, { 4, 1 }, { 5, 6 }, { 6, 7 }, { 7, 8 }, { 8, 5 }, { 1, 5 },
-    { 2, 6 }, { 3, 7 }, { 4, 8 }
+    { 1, 2 }, { 2, 3 }, { 3, 4 }, { 4, 5 }, { 5, 6 }, { 6, 1 },
+    { 7, 8 }, { 8, 9 }, { 9, 10 }, { 10, 11 }, { 11, 12 }, { 12, 7 },
+    { 1, 7 }, { 2, 8 }, { 3, 9 }, { 4, 10 }, { 5, 11 }, { 6, 12 }
 })
+-- ECT
+addModel({
+    { 0, -30, 0 }, { 26, -15, 0 }, { 26, 15, 0 }, { 0, 30, 0 }, { -26, 15, 0 }, { -26, -15, 0 },
+    { 0, -30, -10 }, { 26, -15, -10 }, { 26, 15, -10 }, { 0, 30, -10 }, { -26, 15, -10 }, { -26, -15, -10 }
+}, {
+    { 1, 2 }, { 2, 3 }, { 3, 4 }, { 4, 5 }, { 5, 6 }, { 6, 1 },
+    { 7, 8 }, { 8, 9 }, { 9, 10 }, { 10, 11 }, { 11, 12 }, { 12, 7 },
+    { 1, 7 }, { 2, 8 }, { 3, 9 }, { 4, 10 }, { 5, 11 }, { 6, 12 }
+})
+
+if config.batterysteve.extraload then
+    -- for the brave
+    for i = 1, 20 do
+        addModel({
+            { -30, -30, 0 }, { 0, -40, 0 }, { 30, -30, 0 }, { 40, 0, 0 },
+            { 30,  30,  0 }, { 0, 40, 0 }, { -30, 30, 0 }, { -40, 0, 0 },
+            { -20, 20, 5 }, { -5, 0, 5 }, { -20, -20, 5 },
+            { 20,  20, 5 }, { 5, 0, 5 }, { 20, -20, 5 }
+        }, {
+            { 1, 2 }, { 2, 3 }, { 3, 4 }, { 4, 5 }, { 5, 6 }, { 6, 7 }, { 7, 8 }, { 8, 1 },
+            { 9, 11 }, { 10, 9 }, { 10, 11 },
+            { 12, 14 }, { 13, 12 }, { 13, 14 }
+        })
+    end
+end
 
 for i = 1, particleCount do gValues[i] = math.random(150, 200) end
 
@@ -275,57 +304,10 @@ end
 
 -- wait for full charge
 while true do
-    screen.clear(color.new(TEST and 120 or 20, TEST and 60 or 20,
-        TEST and 60 or 20))
-    local pct = batt.lifepercent() or 0
-    local isCharging = batt.charging()
-    local file = io.open(logFileName, "r")
-    if file then
-        file:close()
-        if config.autotest.enabled then
-            if copyFile(logFileName, "score.autotest.protected.txt") then
-                screen.clear(0)
-                screen.consolexy(5, 5)
-                screen.consoleprint(
-                    "[AUTOTEST]: Log file copied to score.autotest.protected.txt")
-                os.messagebox("yeep")
-                screen.flip()
-                os.delay(6000)
-                break
-            end
-        end
-        local response = os.message(logFileName ..
-            " exists. Do you want to delete it and continue?",
-            1)
-        if response == 1 then
-            os.remove(logFileName)
-            os.message("File deleted. Continuing...")
-        else
-            os.message("Quitting the program...")
-            os.exit()
-        end
-    end
     buttons.read()
-    if pct < 100 then
-        screen.print(240, 120, "Charge to 100%", 0.6, color.new(222, 222, 222))
-        screen.print(200, 140,
-            "Force start [" .. pct .. "%] by pressing Select", 0.4,
-            color.new(50, 42, 24))
-        buttons.read()
-        if buttons.select then break end
-    elseif pct >= 100 then
-        if isCharging then
-            screen.print(240, 150, "Unplug your charger!", 0.5,
-                color.new(200, 200, 200))
-        else
-            screen.print(240, 180, "Press START to begin.", 0.5,
-                color.new(200, 200, 200))
-            -- the config is a table so how can we get autotest from it, fix bnelow
-            if config.autotest.enabled then
-                break
-            end
-            if buttons.start then break end
-        end
+
+    if buttons.select then
+        break
     end
     if buttons.l then
         cpuSpeed = (cpuSpeed == 333) and 222 or 333
@@ -336,23 +318,76 @@ while true do
         musicenabled = not musicenabled
         os.delay(16)
     end
+    if buttons.triangle then
+        unreliablebattery = not unreliablebattery
+        os.delay(16)
+    end
+    if buttons.start and batt.lifepercent() >= 100 and not batt.charging() then
+        break
+    end
+
+    screen.clear(color.new(TEST and 120 or 20, TEST and 60 or 20, TEST and 60 or 20))
+
+    local file = io.open(logFileName, "r")
+    if file then
+        file:close()
+        if config.autotest.enabled then
+            if copyFile(logFileName, "score.autotest.protected.txt") then
+                screen.clear(0)
+                screen.consolexy(5, 5)
+                screen.consoleprint("[AUTOTEST]: Log file copied to score.autotest.protected.txt")
+                screen.flip()
+                os.delay(1000)
+                break
+            end
+        end
+
+        while true do
+            screen.clear(0)
+            screen.consolexy(5, 5)
+            screen.consoleprint("Log file already exists. Do you want to delete it?")
+            screen.consolexy(5, 6)
+            screen.consoleprint("Press X to delete, O to quit")
+            screen.flip()
+            buttons.read()
+            if buttons.cross then
+                os.remove(logFileName)
+                break
+            elseif buttons.circle then
+                os.exit()
+            end
+            os.delay(16)
+        end
+    end
+
     screen.consolexy(1, 1)
     screen.consoleprint("BatterySteve " .. BSV .. " by Koutsie")
     screen.consolexy(1, 2)
     screen.consoleprint("https://the-sauna.icu/BatterySteve/")
-    screen.print(240, 200, "CPU: " .. cpuSpeed .. " MHz [L]", 0.5,
+    screen.print(240, 200, "CPU: " .. cpuSpeed .. " MHz [L]", 0.5, color.new(200, 200, 200))
+    screen.print(240, 220, "Music: " .. (musicenabled and "On" or "Off") .. " [R]", 0.5, color.new(200, 200, 200))
+    screen.print(240, 240, "Basic Bypass: " .. (unreliablebattery and "On" or "Off") .. " [Triangle]", 0.5,
         color.new(200, 200, 200))
-    screen.print(240, 220,
-        "Music: " .. (musicenabled and "On" or "Off") .. " [R]", 0.5,
-        color.new(200, 200, 200))
-    local clocks = tostring(
-        hw.pommel() .. ":" .. hw.board() .. ":" .. os.cpu() ..
-        ":" .. tostring(batt.exists() and "1" or "0"))
-    screen.consolexy(1, 3)
-    screen.consoleprint(clocks)
-    if STEVE then image.blit(SteveImg, 0, 230) end
+
+    local pct = batt.lifepercent() or 0
+    local isCharging = batt.charging()
+    if pct < 100 then
+        screen.print(240, 120, "Charge to 100%", 0.6, color.new(222, 222, 222))
+        screen.print(200, 140, "Force start [" .. pct .. "%] by pressing Select", 0.4, color.new(50, 42, 24))
+    elseif pct >= 100 then
+        if isCharging then
+            screen.print(240, 150, "Unplug your charger!", 0.5, color.new(200, 200, 200))
+        else
+            screen.print(240, 180, "Press START to begin.", 0.5, color.new(200, 200, 200))
+        end
+    end
+
+    if STEVE then
+        image.blit(SteveImg, 0, 230)
+    end
+
     screen.flip()
-    os.delay(32)
+    os.delay(16)
 end
 
 -- shoutouts to laamaa for giving me the thumbsup to use he's music
@@ -363,12 +398,12 @@ function laamaa()
     if not intro then
         intro = sound.load("audio/laamaa-intro.mp3")
         loop = sound.load("audio/laamaa-loop.mp3")
-        sound.vol(intro, 40)
+        sound.vol(intro, 60)
         sound.play(intro)
         return
     end
     if not loopStarted and sound.endstream(intro) then
-        sound.vol(loop, 40)
+        sound.vol(loop, 60)
         sound.play(loop)
         sound.loop(loop)
         loopStarted = true
@@ -377,6 +412,7 @@ end
 
 local lastLog, fps, elapsedSeconds, lastUpdateTime, headerWritten = os.time(), 0, 0, os.time(), false
 local o = 0 -- offset
+
 while true do
     amg.begin()
     if musicenabled then laamaa() end
@@ -416,7 +452,7 @@ while true do
         color.new(avgR, avgG, avgB))
     if not currentRotation then currentRotation = 0 end
     currentRotation = (currentRotation + 0.5) % 360
-    local radius = 2
+    local radius = 2.32
     local camX = math.cos(math.rad(currentRotation)) * radius
     local camZ = math.sin(math.rad(currentRotation)) * radius
     cam3d.position(Camera, { camX, 2, camZ })
@@ -437,53 +473,67 @@ while true do
     local sec = elapsedSeconds % 60
     local min = math.floor(elapsedSeconds / 60) % 60
     local hour = math.floor(elapsedSeconds / 3600) % 24
-    local timeString = string.format("%02d:%02d:%02d", hour, min, sec)
+    local days = math.floor(elapsedSeconds / 86400)
+    local timeString
+    if days > 0 then
+        timeString = string.format("%d day(s) %02d:%02d:%02d", days, hour, min, sec)
+    else
+        timeString = string.format("%02d:%02d:%02d", hour, min, sec)
+    end
 
     fps = screen.fps()
     battPct = batt.lifepercent() or 0
     local remainCap = batt.remaincap()
-
-    -- very bad way of testing if battery cap is done for lol
+    -- if we've ran out of battery and wake back up we conclude that
+    -- we must've ran out of battery
+    -- but if unreliablebattery is set to true we just ignore it (because some batteries report 0 / 0 anyway ??)
     if battPct == 0 and (remainCap == "-" or remainCap == nil) then
         collectgarbage()
         local f = io.open(logFileName, "a")
         if f then
-            f:write(os.date("%Y-%m-%d %H:%M:%S", os.time()) .. ", rt:" ..
+            local logMessage = os.date("%Y-%m-%d %H:%M:%S", os.time()) .. ", rt:" ..
                 timeString .. ", batt:" .. battPct .. ", eq:-/-" ..
-                ", fps:" .. fps .. ", BATTERY_FAILURE" .. "\n")
+                ", fps:" .. fps
+            if config.batterysteve.unreliablebattery then
+                logMessage = logMessage .. ", POSSIBLE_BATTERY_FAULT"
+            else
+                logMessage = logMessage .. ", BATTERY_FAILURE"
+            end
+            f:write(logMessage .. "\n")
             f:close()
         end
 
-        screen.clear(color.new(40, 10, 10))
-        screen.print(240, 130, "BATTERY DIED", 0.7, color.new(255, 50, 50))
-        screen.print(240, 160, "Total runtime: " .. timeString, 0.5,
-            color.new(200, 200, 200))
-        screen.print(240, 190, "Press any button to exit...", 0.5,
-            color.new(200, 200, 200))
-        screen.flip()
-        amg.update()
+        if not config.batterysteve.unreliablebattery then
+            screen.clear(color.new(40, 10, 10))
+            screen.print(240, 130, "BATTERY DIED", 0.7, color.new(255, 50, 50))
+            bigmsg(timeString)
+            screen.print(240, 190, "Press any button to exit...", 0.5,
+                color.new(200, 200, 200))
+            screen.flip()
+            amg.update()
 
-        while true do
-            buttons.read()
-            if buttons.cross or buttons.circle or buttons.triangle or
-                buttons.square or buttons.start or buttons.select then
-                if copyFile(logFileName, logFileNameFinal) then
-                    os.remove(logFileName)
-                    screen.print(240, 220, "Score file backed up.", 0.4,
-                        color.new(150, 150, 150))
-                    screen.flip()
-                    os.delay(3000)
+            while true do
+                buttons.read()
+                if buttons.cross or buttons.circle or buttons.triangle or
+                    buttons.square or buttons.start or buttons.select then
+                    sound.stop(loop)
+                    if copyFile(logFileName, logFileNameFinal) then
+                        os.remove(logFileName)
+                        screen.print(240, 220, "Score file backed up.", 0.4,
+                            color.new(150, 150, 150))
+                        screen.flip()
+                        os.delay(2000)
+                    end
+                    break
                 end
-                break
             end
+            break
         end
-        break
     end
 
     local battTemp = batt.temp() or 0
-    frameCounter = frameCounter + 1
-    if frameCounter >= calcInterval then
-        EqVal, frameCounter = calculateEquation(battPct), 0
+    if config.batterysteve.extraload then
+        EqVal = calculateEquation(battPct)
     end
 
     draw.fillrect(0, 0, 480, 20, color.new(TEST and 120 or 40,
@@ -535,18 +585,26 @@ while true do
         if m.vel then
             m.pos.x, m.pos.y = m.pos.x + m.vel.x, m.pos.y + m.vel.y
             if m.pos.x < 0 or m.pos.x > 480 then
-                m.vel.x = -m.vel.x
+                m.vel.x = -m.vel.x + math.random(-0.3, 0.3)
+                m.vel.y = m.vel.y + math.random(-0.2, 0.2)
                 m.colorBase = {
                     math.random(100, 255), math.random(100, 255),
                     math.random(100, 255)
                 }
             end
             if m.pos.y < 0 or m.pos.y > 272 then
-                m.vel.y = -m.vel.y
+                m.vel.y = -m.vel.y + math.random(-0.3, 0.3)
+                m.vel.x = m.vel.x + math.random(-0.2, 0.2)
                 m.colorBase = {
                     math.random(100, 255), math.random(100, 255),
                     math.random(100, 255)
                 }
+            end
+            if math.abs(m.vel.x) < 0.5 then
+                m.vel.x = m.vel.x + math.random(-0.5, 0.5)
+            end
+            if math.abs(m.vel.y) < 0.5 then
+                m.vel.y = m.vel.y + math.random(-0.5, 0.5)
             end
         end
         local vertsM = {}
