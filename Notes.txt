@@ -11,6 +11,8 @@ Check out the PSP Homebrew Community: https://discord.gg/bePrj9W
 Shoutouts to Quadruple for being a rubber duck debugger.
 Special thanks to Pinja for their support <3
 
+
+WIP:
 Release source code is minifed because that achieves a whopping 45.62% compression ratio (on average).
 For unminified source code, look at:
 

@@ -4,6 +4,16 @@
 -- Fedi/Mastodon: https://layer8.space/@k
 -- Report is saved as score.old.txt
 -- config
+
+function loading()
+    screen.txtcolor(color.new(30, 30, 30))
+    screen.consolexy(1, 1)
+    screen.consoleprint("Loading...")
+    screen.flip()
+end
+
+loading()
+
 math.randomseed(os.time())
 
 logFileName = "score.txt"
@@ -40,7 +50,7 @@ local loopStarted = false
 
 STEVE = false
 TEST = false
-BSV = "1.1.2"
+BSV = "1.2.0"
 
 -- run config manager
 config = require("modules/cmanager")
@@ -62,10 +72,10 @@ if TEST then BSV = BSV .. " [TEST]" end
 
 -- custom splashes
 local splashes = {
-    "/images/splash.png", "/images/pspunk.png", "/images/laamaa.png"
+    "/images/splash.png", "/images/laamaa.png", "/images/pspunk.png", "/images/nuclear.png"
 }
-local fade_steps, delay = 20, 16
-local display_time = 4000
+local fade_steps, delay = 10, 12
+local display_time = 5555
 
 if not config.autotest.enabled and config.batterysteve.splashes then
     for i = 1, #splashes do
@@ -343,6 +353,7 @@ while true do
 
         while true do
             screen.clear(0)
+            screen.txtcolor(color.new(200, 100, 100))
             screen.consolexy(5, 5)
             screen.consoleprint("Log file already exists. Do you want to delete it?")
             screen.consolexy(5, 6)
@@ -374,25 +385,28 @@ while true do
             end
         end
     end
+    -- good colourscheme orange / black
+    screen.txtcolor(color.new(200, 200, 200))
+    screen.txtbgcolor(color.new(20, 20, 20))
     screen.consolexy(1, 1)
     screen.consoleprint("BatterySteve " .. BSV .. " by Koutsie")
     screen.consolexy(1, 2)
     screen.consoleprint("https://the-sauna.icu/BatterySteve/")
     screen.print(220, 200, "CPU: " .. cpuSpeed .. " MHz [L]", 0.5, color.new(200, 200, 200))
     screen.print(220, 220, "Music: " .. (musicenabled and "On" or "Off") .. " [R]", 0.5, color.new(200, 200, 200))
-    screen.print(220, 240, "Basic Bypass: " .. (unreliablebattery and "On" or "Off") .. " [Triangle]", 0.5,
+    screen.print(220, 240, "Basic bypass: " .. (unreliablebattery and "On" or "Off") .. " [TRIANGLE]", 0.5,
         color.new(200, 200, 200))
 
     local pct = batt.lifepercent() or 0
     local isCharging = batt.charging()
     if pct < 100 then
-        screen.print(220, 120, "Charge to 100%", 0.6, color.new(222, 222, 222))
-        screen.print(200, 140, "Force start [" .. pct .. "%] by pressing Select", 0.4, color.new(50, 42, 24))
+        screen.print(220, 120, "CHARGE TO 100%", 0.6, color.new(222, 222, 222))
+        screen.print(200, 140, "FORCE START [" .. pct .. "%] BY SELECT", 0.4, color.new(50, 42, 24))
     elseif pct >= 100 then
         if isCharging then
-            screen.print(220, 150, "Unplug your charger!", 0.5, color.new(200, 200, 200))
+            screen.print(220, 150, "UNPLUG YOUR CHARGER!", 0.5, color.new(200, 200, 200))
         else
-            screen.print(220, 180, "Press START to begin.", 0.5, color.new(200, 200, 200))
+            screen.print(220, 180, "PRESS START TO BEGIN", 0.5, color.new(200, 200, 200))
         end
     end
 
@@ -403,6 +417,8 @@ while true do
     screen.flip()
     os.delay(16)
 end
+
+loading()
 
 -- shoutouts to laamaa for giving me the thumbsup to use he's music
 -- go buy the track!
@@ -646,9 +662,9 @@ while true do
     draw.fillrect(5, 25, 100, 3, color.new(50, 50, 50))
     draw.fillrect(5, 25, battLevel, 3, barColor)
     screen.print(5, 30,
-        string.format("LIFE: %s", batt.lifetime()), 0.25, color.new(200, 200, 200))
+        string.format("LEFT: %s", batt.lifetime()), 0.25, color.new(200, 200, 200))
 
-    if not batt.charging() then
+    if batt.charging() then
         local rectHeight = 272 * 0.33
         draw.fillrect(0, rectHeight, 480, rectHeight, color.new(200, 200, 50))
         local message = "CHARGER PLUGGED IN!"
