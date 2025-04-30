@@ -1,0 +1,19 @@
+{
+    "Lua.diagnostics.globals": [
+        "color",
+        "screen",
+        "buttons",
+        "image",
+        "hw",
+        "cam3d",
+        "__8888",
+        "amg",
+        "model3d",
+        "files",
+        "draw",
+        "sound"
+    ],
+    "Lua.diagnostics.disable": [
+        "undefined-field"
+    ]
+}
