@@ -1,3 +1,0 @@
-BatterySteve 1.1.2 on Emulator(--, --)
-2025-04-30 21:34:33, rt:00:00:29, batt:100, eq:- mAh/- mAh, bV:- v, fps:20
-2025-04-30 21:35:03, rt:00:00:59, batt:100, eq:- mAh/- mAh, bV:- v, fps:20

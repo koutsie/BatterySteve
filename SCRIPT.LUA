@@ -15,6 +15,7 @@ local logInterval = 30
 
 local eqA, eqB, eqD = 0.3, 0.2, 0.5
 local battPct = 100
+local battlifestimate = 0
 local cpuSpeed
 local unreliablebattery
 
@@ -284,8 +285,6 @@ for i = 1, particleCount do
     }
 end
 
-EqVal = calculateEquation(battPct)
-
 local function copyFile(source, dest)
     local inFile = io.open(source, "rb")
     if inFile then
@@ -359,26 +358,41 @@ while true do
             os.delay(16)
         end
     end
-
+    -- if logFileNameFinal exists use consoleprint to display in
+    local file = io.open(logFileNameFinal, "r")
+    if file then
+        if file then
+            local lastLine = nil
+            for line in file:lines() do
+                lastLine = line
+            end
+            file:close()
+            if lastLine then
+                lastRT = lastLine:match("rt:%s*([%d:]+)")
+                screen.consolexy(60, 1)
+                screen.consoleprint(lastRT)
+            end
+        end
+    end
     screen.consolexy(1, 1)
     screen.consoleprint("BatterySteve " .. BSV .. " by Koutsie")
     screen.consolexy(1, 2)
     screen.consoleprint("https://the-sauna.icu/BatterySteve/")
-    screen.print(240, 200, "CPU: " .. cpuSpeed .. " MHz [L]", 0.5, color.new(200, 200, 200))
-    screen.print(240, 220, "Music: " .. (musicenabled and "On" or "Off") .. " [R]", 0.5, color.new(200, 200, 200))
-    screen.print(240, 240, "Basic Bypass: " .. (unreliablebattery and "On" or "Off") .. " [Triangle]", 0.5,
+    screen.print(220, 200, "CPU: " .. cpuSpeed .. " MHz [L]", 0.5, color.new(200, 200, 200))
+    screen.print(220, 220, "Music: " .. (musicenabled and "On" or "Off") .. " [R]", 0.5, color.new(200, 200, 200))
+    screen.print(220, 240, "Basic Bypass: " .. (unreliablebattery and "On" or "Off") .. " [Triangle]", 0.5,
         color.new(200, 200, 200))
 
     local pct = batt.lifepercent() or 0
     local isCharging = batt.charging()
     if pct < 100 then
-        screen.print(240, 120, "Charge to 100%", 0.6, color.new(222, 222, 222))
+        screen.print(220, 120, "Charge to 100%", 0.6, color.new(222, 222, 222))
         screen.print(200, 140, "Force start [" .. pct .. "%] by pressing Select", 0.4, color.new(50, 42, 24))
     elseif pct >= 100 then
         if isCharging then
-            screen.print(240, 150, "Unplug your charger!", 0.5, color.new(200, 200, 200))
+            screen.print(220, 150, "Unplug your charger!", 0.5, color.new(200, 200, 200))
         else
-            screen.print(240, 180, "Press START to begin.", 0.5, color.new(200, 200, 200))
+            screen.print(220, 180, "Press START to begin.", 0.5, color.new(200, 200, 200))
         end
     end
 
@@ -452,7 +466,7 @@ while true do
         color.new(avgR, avgG, avgB))
     if not currentRotation then currentRotation = 0 end
     currentRotation = (currentRotation + 0.5) % 360
-    local radius = 2.32
+    local radius = 2.4
     local camX = math.cos(math.rad(currentRotation)) * radius
     local camZ = math.sin(math.rad(currentRotation)) * radius
     cam3d.position(Camera, { camX, 2, camZ })
@@ -488,6 +502,9 @@ while true do
     -- we must've ran out of battery
     -- but if unreliablebattery is set to true we just ignore it (because some batteries report 0 / 0 anyway ??)
     if battPct == 0 and (remainCap == "-" or remainCap == nil) then
+        if musicenabled then
+            sound.stop(loop)
+        end
         collectgarbage()
         local f = io.open(logFileName, "a")
         if f then
@@ -505,9 +522,9 @@ while true do
 
         if not config.batterysteve.unreliablebattery then
             screen.clear(color.new(40, 10, 10))
-            screen.print(240, 130, "BATTERY DIED", 0.7, color.new(255, 50, 50))
+            screen.print(240, 190, "BATTERY DIED", 0.7, color.new(255, 50, 50))
             bigmsg(timeString)
-            screen.print(240, 190, "Press any button to exit...", 0.5,
+            screen.print(240, 210, "Press any button to exit...", 0.5,
                 color.new(200, 200, 200))
             screen.flip()
             amg.update()
@@ -516,7 +533,9 @@ while true do
                 buttons.read()
                 if buttons.cross or buttons.circle or buttons.triangle or
                     buttons.square or buttons.start or buttons.select then
-                    sound.stop(loop)
+                    if musicenabled then
+                        sound.stop(loop)
+                    end
                     if copyFile(logFileName, logFileNameFinal) then
                         os.remove(logFileName)
                         screen.print(240, 220, "Score file backed up.", 0.4,
@@ -531,36 +550,6 @@ while true do
         end
     end
 
-    local battTemp = batt.temp() or 0
-    if config.batterysteve.extraload then
-        EqVal = calculateEquation(battPct)
-    end
-
-    draw.fillrect(0, 0, 480, 20, color.new(TEST and 120 or 40,
-        TEST and 60 or 40, TEST and 60 or 40))
-    local tempStr
-    if hw.getmodel() == "Go" then
-        tempStr = ""
-    elseif hw.getmodel() == "Street" then
-        tempStr = ""
-    else
-        tempStr = " TEMP: " .. battTemp .. "*C"
-    end
-
-    screen.print(5, 8,
-        "BATT: " .. battPct .. tempStr .. " | CPU: " .. os.cpu() .. "/" ..
-        os.bus() .. " Mhz", 0.5, color.new(200, 200, 200))
-    local battLevel = tonumber(string.match(battPct, "(%d+)") or "0")
-    local barColor
-    if battLevel > 80 then
-        barColor = color.new(50, 200, 50)
-    elseif battLevel > 45 then
-        barColor = color.new(200, 200, 50)
-    else
-        barColor = color.new(200, 50, 50)
-    end
-    draw.fillrect(5, 25, 100, 3, color.new(50, 50, 50))
-    draw.fillrect(5, 25, battLevel, 3, barColor)
     for _, p in ipairs(particles) do
         p.x, p.y = p.x + p.vx, p.y + p.vy
         if p.x < 0 or p.x > 480 then p.vx = -p.vx end
@@ -626,9 +615,51 @@ while true do
         end
     end
 
+    local battTemp = batt.temp() or 0
+    if config.batterysteve.extraload then
+        EqVal = calculateEquation(battPct)
+    end
+
+    draw.fillrect(0, 0, 480, 20, color.new(TEST and 120 or 40,
+        TEST and 60 or 40, TEST and 60 or 40))
+    local tempStr
+    if hw.getmodel() == "Go" then
+        tempStr = ""
+    elseif hw.getmodel() == "Street" then
+        tempStr = ""
+    else
+        tempStr = " TEMP: " .. battTemp .. "*C"
+    end
+
+    screen.print(5, 8,
+        "BATT: " .. battPct .. tempStr .. " | CPU: " .. os.cpu() .. "/" ..
+        os.bus() .. " Mhz", 0.5, color.new(200, 200, 200))
+    local battLevel = tonumber(string.match(battPct, "(%d+)") or "0")
+    local barColor
+    if battLevel > 80 then
+        barColor = color.new(50, 200, 50)
+    elseif battLevel > 45 then
+        barColor = color.new(200, 200, 50)
+    else
+        barColor = color.new(200, 50, 50)
+    end
+    draw.fillrect(5, 25, 100, 3, color.new(50, 50, 50))
+    draw.fillrect(5, 25, battLevel, 3, barColor)
+    screen.print(5, 30,
+        string.format("LIFE: %s", batt.lifetime()), 0.25, color.new(200, 200, 200))
+
+    if not batt.charging() then
+        local rectHeight = 272 * 0.33
+        draw.fillrect(0, rectHeight, 480, rectHeight, color.new(200, 200, 50))
+        local message = "CHARGER PLUGGED IN!"
+        screen.print((480 - screen.textwidth(message, 1.0)) / 2, rectHeight + rectHeight / 2 - 1, message, 1.0,
+            color.new(50, 50, 50))
+    end
+
     draw.fillrect(0, 250, 480, 22, color.new(TEST and 120 or 40,
         TEST and 60 or 40,
         TEST and 40 or 40))
+
     local hwgen = hw.gen()
     local cfw = os.cfw()
     local model = (cfw ~= "UNK") and tostring(hw.getmodel() .. " on " .. cfw) or
@@ -648,7 +679,7 @@ while true do
 
     screen.print(5, 258,
         string.format("FPS:%d RUN:%s %s| %s %s", fps, timeString,
-            batteryStr, hwgen, model), 0.40,
+            batteryStr, string.upper(hwgen), string.upper(model)), 0.40,
         color.new(200, 200, 200))
 
     if os.time() - lastLog >= logInterval then
@@ -669,10 +700,10 @@ while true do
         if logFile then
             local remainCap = tostring(batt and batt.remaincap() or "N/A")
             local fullCap = tostring(batt and batt.fullcap() or "N/A")
-            logFile:write(os.date("%Y-%m-%d %H:%M:%S", os.time()) .. ", rt:" ..
-                timeString .. ", batt:" .. battPct .. ", eq:" ..
+            local lifetime = tostring(batt and batt.lifetime() or "N/A")
+            logFile:write("rt:" .. timeString .. ", batt:" .. battPct .. ", eq:" ..
                 remainCap .. " mAh/" .. fullCap .. " mAh" .. ", bV:" ..
-                batvolt .. " v" .. ", fps:" .. fps .. "\n")
+                batvolt .. " v" .. ", life:" .. lifetime .. " min" .. ", fps:" .. fps .. "\n")
             logFile:close()
         end
 
@@ -690,6 +721,10 @@ while true do
     screen.flip()
 end
 
+if musicenabled then
+    sound.stop(intro)
+    sound.stop(loop)
+end
 screen.clear(color.new(5, 60, 5))
 screen.flip()
 draw.fillrect(0, 0, 480, 272, color.new(40, 40, 40))
