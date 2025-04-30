@@ -28,7 +28,7 @@ BatterySteve is a lightweight and easy-to-use tool designed to test the real cap
 
 ## Changelogs
 
-- **1.1.0**: Proper model detection, autotesting, setting options from configuration file, report last test by holding up when booting....
+- **1.1.1**: Proper model detection, autotesting, setting options from configuration file, report last test by holding up when booting....
 - **1.0.3-E**: Fixed detection for Go/Street models.
 - **1.0.3**: First public release.
 
