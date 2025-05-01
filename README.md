@@ -27,6 +27,7 @@ BatterySteve is a lightweight and easy-to-use tool designed to test the real cap
 3. **Run**: Launch BatterySteve from the XMB menu under the Game section.
 
 ## Changelogs
+-- **1.2.1**: Made logs be sequential and did some major refactoring to account for faulty batteries.
 - **1.2.0**: Stylistic changes, nyanbat/unreliable battery mode (continue test even when detecting empty battery) and code improvements!
 - **1.1.1**: Proper model detection, autotesting, setting options from configuration file, report last test by holding up when booting....
 - **1.0.3-E**: Fixed detection for Go/Street models.
