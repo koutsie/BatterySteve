@@ -14,11 +14,12 @@ end
 
 loading()
 
-math.randomseed(os.time())
+math.randomseed(133742069)
 
-logFileName = "score.txt"
-logFileNameBak = "score.bak.txt"
-logFileNameFinal = "score.old.txt"
+local logFileName = "score.txt"
+local logFileNameBak = "score.bak.txt"
+local logFileNameFinal = "score.final.txt"
+local logMoveFolder = "logs"
 
 local lastBackup = os.time()
 local logInterval = 30
@@ -295,22 +296,6 @@ for i = 1, particleCount do
     }
 end
 
-local function copyFile(source, dest)
-    local inFile = io.open(source, "rb")
-    if inFile then
-        local data = inFile:read("*all")
-        inFile:close()
-
-        local outFile = io.open(dest, "wb")
-        if outFile then
-            outFile:write(data)
-            outFile:close()
-            return true
-        end
-    end
-    return false
-end
-
 -- wait for full charge
 while true do
     buttons.read()
@@ -337,41 +322,24 @@ while true do
 
     screen.clear(color.new(TEST and 120 or 20, TEST and 60 or 20, TEST and 60 or 20))
 
-    local file = io.open(logFileName, "r")
-    if file then
-        file:close()
-        if config.autotest.enabled then
+    if config.autotest.enabled then
+        local file = io.open(logFileName, "r")
+        if file then
+            file:close()
             if copyFile(logFileName, "score.autotest.protected.txt") then
                 screen.clear(0)
                 screen.consolexy(5, 5)
                 screen.consoleprint("[AUTOTEST]: Log file copied to score.autotest.protected.txt")
                 screen.flip()
-                os.delay(1000)
-                break
+                os.delay(2000)
             end
         end
-
-        while true do
-            screen.clear(0)
-            screen.txtcolor(color.new(200, 100, 100))
-            screen.consolexy(5, 5)
-            screen.consoleprint("Log file already exists. Do you want to delete it?")
-            screen.consolexy(5, 6)
-            screen.consoleprint("Press X to delete, O to quit")
-            screen.flip()
-            buttons.read()
-            if buttons.cross then
-                os.remove(logFileName)
-                break
-            elseif buttons.circle then
-                os.exit()
-            end
-            os.delay(16)
-        end
+        break
     end
-    -- if logFileNameFinal exists use consoleprint to display in
-    local file = io.open(logFileNameFinal, "r")
-    if file then
+
+    local lastLogFile = getLastLogFile()
+    if lastLogFile then
+        local file = io.open(lastLogFile, "r")
         if file then
             local lastLine = nil
             for line in file:lines() do
@@ -385,7 +353,7 @@ while true do
             end
         end
     end
-    -- good colourscheme orange / black
+
     screen.txtcolor(color.new(200, 200, 200))
     screen.txtbgcolor(color.new(20, 20, 20))
     screen.consolexy(1, 1)
@@ -524,9 +492,7 @@ while true do
         collectgarbage()
         local f = io.open(logFileName, "a")
         if f then
-            local logMessage = os.date("%Y-%m-%d %H:%M:%S", os.time()) .. ", rt:" ..
-                timeString .. ", batt:" .. battPct .. ", eq:-/-" ..
-                ", fps:" .. fps
+            local logMessage = "rt:" .. timeString .. ", batt:" .. battPct .. ", eq:-/-" .. ", fps:" .. fps
             if config.batterysteve.unreliablebattery then
                 logMessage = logMessage .. ", POSSIBLE_BATTERY_FAULT"
             else
@@ -718,7 +684,7 @@ while true do
             local fullCap = tostring(batt and batt.fullcap() or "N/A")
             local lifetime = tostring(batt and batt.lifetime() or "N/A")
             logFile:write("rt:" .. timeString .. ", batt:" .. battPct .. ", eq:" ..
-                remainCap .. " mAh/" .. fullCap .. " mAh" .. ", bV:" ..
+                remainCap .. " /" .. fullCap .. " " .. ", bV:" ..
                 batvolt .. " v" .. ", life:" .. lifetime .. " min" .. ", fps:" .. fps .. "\n")
             logFile:close()
         end
