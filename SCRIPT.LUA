@@ -51,11 +51,10 @@ local loopStarted = false
 
 STEVE = false
 TEST = false
-BSV = "1.2.0"
+BSV = "1.2.1"
 
 -- run config manager
 config = require("modules/cmanager")
-
 
 musicenabled = config.batterysteve.music
 unreliablebattery = config.batterysteve.unreliablebattery

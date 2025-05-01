@@ -1,3 +1,0 @@
-BatterySteve 1.2.0 on Emulator(--, --)
-rt:00:00:29, batt:100, eq:- /- , bV:- v, life:- min, fps:59
-rt:00:00:59, batt:100, eq:- /- , bV:- v, life:- min, fps:60
