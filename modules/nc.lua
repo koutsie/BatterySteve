@@ -1,5 +1,11 @@
 local nc = {}
 
+-- fuck it we define them twice, carbage collector will take....
+local logFileName = "score.txt"
+local logFileNameBak = "score.bak.txt"
+local logFileNameFinal = "score.final.txt"
+local logMoveFolder = "logs"
+
 local COLORS = {
     text = color.new(2, 146, 199),
     background = color.new(0, 0, 0),
@@ -134,12 +140,6 @@ function getLastLogFile()
     end
     return nil
 end
-
--- fuck it we define them twice, carbage collector will take....
-local logFileName = "score.txt"
-local logFileNameBak = "score.bak.txt"
-local logFileNameFinal = "score.final.txt"
-local logMoveFolder = "logs"
 
 local function moveLogsSequentially()
     local logFiles = {
