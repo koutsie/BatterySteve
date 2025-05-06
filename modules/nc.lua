@@ -1,4 +1,6 @@
 local nc = {}
+-- for TC/NC
+
 
 -- fuck it we define them twice, carbage collector will take....
 local logFileName = "score.txt"

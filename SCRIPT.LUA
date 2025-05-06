@@ -44,14 +44,19 @@ local gValues = {}
 local intro, loop
 local musicenabled = nil
 local loopStarted = false
+local graph = {}
 
 -- we can just name our font onefont.pgf to load it.
 -- Font = font.load("tiny.pgf")
 -- font.setdefault(Font)
 
 STEVE = false
+if os.date("%d") == "01" and os.date("%m") == "04" then
+    STEVE = true
+end
 TEST = false
-BSV = "1.2.1"
+BSV = "1.2.3" -- one two three, battery steve is free
+
 
 -- run config manager
 config = require("modules/cmanager")
@@ -61,90 +66,48 @@ unreliablebattery = config.batterysteve.unreliablebattery
 cpuSpeed = config.batterysteve.cpu
 os.cpu(cpuSpeed)
 
--- we have to run nc, can we runfile or?
+-- we have to run nc
 nc = require("modules/nc")
 nc.run()
 if TEST then BSV = BSV .. " [TEST]" end
 
--- include tachyontoname from modules
---local tachyontoname = require("modules/tachyontoname")
-
-
+-- graph module
+local graph = require("modules.graph")
 -- custom splashes
+local splash = require("modules.splash")
 local splashes = {
     "/images/splash.png", "/images/laamaa.png", "/images/pspunk.png", "/images/nuclear.png"
 }
-local fade_steps, delay = 10, 12
-local display_time = 5555
+local fade_steps, delay = 6, 10
+local display_time = 6000
 
-if not config.autotest.enabled and config.batterysteve.splashes then
-    for i = 1, #splashes do
-        local p = splashes[i]
-        local img = image.load(p)
-        if not img then
-            os.message("Failed to load " .. p)
-        else
-            screen.clear(0)
-            screen.flip()
-            for j = 0, fade_steps do
-                local a = math.floor((j / fade_steps) * 255)
-                image.blit(img, 0, 0, a)
-                screen.flip()
-                os.delay(delay)
-            end
-            local start = os.time()
-            while os.time() - start < display_time / 1000 do
-                buttons.read()
-                if buttons.cross or buttons.circle or buttons.triangle or
-                    buttons.square or buttons.start or buttons.select then
-                    break
-                end
-                image.blit(img, 0, 0, 255)
-                screen.print(350, 10, "Press any button to skip.", 0.25,
-                    color.new(255, 255, 255))
-                screen.flip()
-                os.delay(delay)
-            end
-            for j = fade_steps, 0, -1 do
-                local a = math.floor((j / fade_steps) * 255)
-                image.blit(img, 0, 0, a)
-                screen.flip()
-                os.delay(delay)
-            end
-        end
-    end
-end
+splash.show(splashes, fade_steps, delay, display_time, config)
 
 if hw.getmodel() == "Vita" then
     screen.consoleprint("The PS Vita is not supported.")
-    os.delay(5000)
+    os.delay(6000)
     os.exit()
 end
 
-local function constrainValue(val, min, max)
-    if val ~= val then return 0 end
-    return math.min(math.max(val, min), max)
-end
+local utils = require("modules.utils")
 
+-- funkie "cuboid"
 local half = cubeSize / 2
-local baseVerts = {
-    { -half, -half, -half }, { half, -half, -half }, { half, half, -half },
-    { -half, half,  -half }, { -half, -half, half }, { half, -half, half },
-    { half, half, half }, { -half, half, half }
-}
+local baseVerts = {}
+for x = -1, 1, 2 do
+    for y = -1, 1, 2 do
+        for z = -1, 1, 2 do
+            table.insert(baseVerts, { x * half, y * half, z * half })
+        end
+    end
+end
 local baseEdges = {
-    { 1, 2 }, { 2, 3 }, { 3, 4 }, { 4, 1 }, { 5, 6 }, { 6, 7 }, { 7, 8 }, { 8, 5 }, { 1, 5 },
-    { 2, 6 }, { 3, 7 }, { 4, 8 }
+    { 1, 2 }, { 2, 3 }, { 3, 4 }, { 4, 1 }, { 5, 6 }, { 6, 7 }, { 7, 8 }, { 8, 5 },
+    { 1, 5 }, { 2, 6 }, { 3, 7 }, { 4, 8 }
 }
 
 local function rotatePoint(p, ax, ay, az)
-    local x, y, z = p[1], p[2], p[3]
-    local cx, sx = math.cos(ax), math.sin(ax)
-    local cy, sy = math.cos(ay), math.sin(ay)
-    local cz, sz = math.cos(az), math.sin(az)
-    local y1, z1 = y * cx - z * sx, y * sx + z * cx
-    local x2, z2 = x * cy + z1 * sy, z1 * cy - x * sy
-    return { x2 * cz - y1 * sz, x2 * sz + y1 * cz, z2 }
+    return utils.rotatePoint(p, ax, ay, az)
 end
 
 local SteveImg
@@ -154,25 +117,7 @@ if STEVE then
 end
 
 local function calculateEquation(b)
-    if type(b) ~= "number" then error("Input b must be a number") end
-    b = constrainValue(b, -100, 100)
-    local x = (math.random() * 3.14 * math.sqrt(math.abs(b) + 0.1))
-    x = constrainValue(x, -10, 10)
-    local eqM = constrainValue(math.cos(b * 0.5) * math.sin(x) + 0.81, 0.1, 5)
-    local t1 =
-        constrainValue(math.sin(x * eqA) * math.cos((b + 2) * eqB), -5, 5)
-    local t2 = constrainValue(math.pow(math.abs(x + b * 0.32), 1.5) +
-        math.log(x + 1.1), 0.1, 10)
-    local t3 = constrainValue(math.sqrt(b + 1) * eqM, 0.1, 10)
-    local t4 = constrainValue(math.cos(x * b + 0.5) * t3, -5, 5)
-    local modifier = constrainValue(math.sin(t1 * 0.5) * 0.42 + 0.91, 0.5, 2)
-    local t5 = constrainValue(math.sqrt(math.abs(t1 + t2 + t3 + t4) + 0.001),
-        0.1, 10)
-    local t6 = constrainValue(t5 * math.sin(t4 * 0.15), -5, 5)
-    local t7 = constrainValue(math.atan(t6 / (t5 + 0.01)) * modifier, -5, 5)
-    local result = constrainValue(math.sin(t6 * eqD) * math.cos(t6 / 2) * eqM,
-        -100, 100)
-    return result
+    return utils.calculateEquation(b, eqA, eqB, eqD, utils.constrainValue)
 end
 
 --  3d
@@ -180,60 +125,26 @@ local currentRotation = 0
 amg.init()
 Camera = cam3d.new()
 amg.quality(__8888)
-amg.perspective(65.0)
+amg.perspective(46.0)
 amg.typelight(1, __DIRECTIONAL)
 amg.colorlight(1, color.new(50, 50, 50), color.new(100, 100, 100), color.new(200, 200, 200))
-amg.poslight(1, { 1, 5, 1 })
+amg.poslight(1, { 1, 4, 1 })
 Plane = model3d.load(files.cdir() .. "/3d/Data/Plane/plane.obj")
 Ball = model3d.load(files.cdir() .. "/3d/Data/Ball/ball.obj")
-local scaleValues = { 0.75, 0.75, 0.75 }
+local scaleValues = { 0.70, 0.70, 0.70 }
 model3d.scaling(Ball, 1, scaleValues)
 model3d.shading(Ball, 1)
+model3d.position(Ball, 1, { 0, 1, 0 })
 model3d.scaling(Plane, 1, { 0.5, 0.5, 0.5 })
-model3d.position(Plane, 1, { 0, -0.5, 0 })
-local BallRotX, BallRotY, BallRotZ = -743, 0, 0
+model3d.position(Plane, 1, { 0, -0.55, 0 })
+local BallRotX, BallRotY, BallRotZ = -360, 45, 32
 local BallRotSpeedX, BallRotSpeedY, BallRotSpeedZ = 0.06, 0.06, 0.045
 
-local models = {}
-models[1] = {
-    verts = baseVerts,
-    edges = baseEdges,
-    pos = { x = cubePosX, y = cubePosY, z = 0 },
-    rot = { x = cubeRotX, y = cubeRotY, z = cubeRotZ },
-    rotSpeed = { x = rotSpeedX / 2, y = rotSpeedY / 2, z = rotSpeedZ / 2 },
-    scale = 0.85 / 2,
-    colorBase = { 123, 223, 2 }
-}
-
-local function addModel(vertices, edges)
-    local scale = math.random(30, 60) * 0.01
-    local position = { x = math.random(0, 480), y = math.random(0, 272), z = 0 }
-    local velocity = {
-        x = math.random() * 2 - 1,
-        y = math.random() * 2 - 1
-    }
-    local rotationSpeed = {
-        x = math.random() * 0.06,
-        y = math.random() * 0.06,
-        z = math.random() * 0.036
-    }
-    local colorBase = {
-        math.random(50, 255), math.random(50, 255), math.random(50, 255)
-    }
-    models[#models + 1] = {
-        verts = vertices,
-        edges = edges,
-        pos = position,
-        rot = { x = 0, y = 0, z = 0 },
-        rotSpeed = rotationSpeed,
-        scale = scale,
-        vel = velocity,
-        colorBase = colorBase
-    }
-end
+local modelmod = require("modules/modelmod")
+modelmod.init(baseVerts, baseEdges, cubePosX, cubePosY, cubeRotX, cubeRotY, cubeRotZ, rotSpeedX, rotSpeedY, rotSpeedZ)
 
 -- floaties
-addModel({
+modelmod.addModel({
     { -30, -30, 0 }, { 0, -40, 0 }, { 30, -30, 0 }, { 40, 0, 0 },
     { 30,  30,  0 }, { 0, 40, 0 }, { -30, 30, 0 }, { -40, 0, 0 },
     { -20, 10, 5 }, { -10, 10, 5 }, { -10, 20, 5 }, { -20, 20, 5 },
@@ -246,8 +157,7 @@ addModel({
     { 17, 18 }, { 18, 19 }, { 19, 20 }
 })
 
--- hexa
-addModel({
+modelmod.addModel({
     { 0, -30, 15 }, { 26, -15, 15 }, { 26, 15, 15 }, { 0, 30, 15 }, { -26, 15, 15 }, { -26, -15, 15 },
     { 0, -30, -15 }, { 26, -15, -15 }, { 26, 15, -15 }, { 0, 30, -15 }, { -26, 15, -15 }, { -26, -15, -15 }
 }, {
@@ -255,20 +165,19 @@ addModel({
     { 7, 8 }, { 8, 9 }, { 9, 10 }, { 10, 11 }, { 11, 12 }, { 12, 7 },
     { 1, 7 }, { 2, 8 }, { 3, 9 }, { 4, 10 }, { 5, 11 }, { 6, 12 }
 })
--- ECT
-addModel({
+
+--[[ modelmod.addModel({
     { 0, -30, 0 }, { 26, -15, 0 }, { 26, 15, 0 }, { 0, 30, 0 }, { -26, 15, 0 }, { -26, -15, 0 },
     { 0, -30, -10 }, { 26, -15, -10 }, { 26, 15, -10 }, { 0, 30, -10 }, { -26, 15, -10 }, { -26, -15, -10 }
 }, {
     { 1, 2 }, { 2, 3 }, { 3, 4 }, { 4, 5 }, { 5, 6 }, { 6, 1 },
     { 7, 8 }, { 8, 9 }, { 9, 10 }, { 10, 11 }, { 11, 12 }, { 12, 7 },
     { 1, 7 }, { 2, 8 }, { 3, 9 }, { 4, 10 }, { 5, 11 }, { 6, 12 }
-})
+}) ]]
 
 if config.batterysteve.extraload then
-    -- for the brave
-    for i = 1, 20 do
-        addModel({
+    for i = 1, 30 do
+        modelmod.addModel({
             { -30, -30, 0 }, { 0, -40, 0 }, { 30, -30, 0 }, { 40, 0, 0 },
             { 30,  30,  0 }, { 0, 40, 0 }, { -30, 30, 0 }, { -40, 0, 0 },
             { -20, 20, 5 }, { -5, 0, 5 }, { -20, -20, 5 },
@@ -281,19 +190,28 @@ if config.batterysteve.extraload then
     end
 end
 
-for i = 1, particleCount do gValues[i] = math.random(150, 200) end
+local models = modelmod.getModels()
 
+local halfParticleSpeed = (particleMaxSpeed - particleMinSpeed) * 0.5
 for i = 1, particleCount do
-    local g = gValues[i]
+    local g = 222
+    local speedX = (math.random() * 2 - 1) * halfParticleSpeed
+    local speedY = (math.random() * 2 - 1) * halfParticleSpeed
     particles[i] = {
         x = math.random(0, 480),
         y = math.random(0, 272),
-        vx = math.random(particleMinSpeed, particleMaxSpeed) * 0.5,
-        vy = math.random(particleMinSpeed, particleMaxSpeed) * 0.5,
+        vx = speedX,
+        vy = speedY,
         radius = math.random(1, particleRadius),
         color = draw.newcolor and draw.newcolor(g, g, g) or color.new(g, g, g)
     }
 end
+
+collectgarbage()
+
+-- load bg from images/bg.png
+local bg = image.load("/images/bg.gif")
+image.resize(bg, 480, 272)
 
 -- wait for full charge
 while true do
@@ -319,7 +237,11 @@ while true do
         break
     end
 
-    screen.clear(color.new(TEST and 120 or 20, TEST and 60 or 20, TEST and 60 or 20))
+    if bg then
+        image.blit(bg, 0, 0)
+    else
+        screen.clear(color.new(TEST and 120 or 20, TEST and 60 or 20, TEST and 60 or 20))
+    end
 
     if config.autotest.enabled then
         local file = io.open(logFileName, "r")
@@ -359,21 +281,28 @@ while true do
     screen.consoleprint("BatterySteve " .. BSV .. " by Koutsie")
     screen.consolexy(1, 2)
     screen.consoleprint("https://the-sauna.icu/BatterySteve/")
-    screen.print(220, 200, "CPU: " .. cpuSpeed .. " MHz [L]", 0.5, color.new(200, 200, 200))
-    screen.print(220, 220, "Music: " .. (musicenabled and "On" or "Off") .. " [R]", 0.5, color.new(200, 200, 200))
-    screen.print(220, 240, "Basic bypass: " .. (unreliablebattery and "On" or "Off") .. " [TRIANGLE]", 0.5,
-        color.new(200, 200, 200))
+
+    utils.drawTextWithShadow(220, 200, "CPU: " .. cpuSpeed .. " MHz [L]", 0.5, color.new(200, 200, 200),
+        color.new(50, 42, 24))
+    utils.drawTextWithShadow(220, 220, "Music: " .. (musicenabled and "On" or "Off") .. " [R]", 0.5,
+        color.new(200, 200, 200),
+        color.new(50, 42, 24))
+    utils.drawTextWithShadow(220, 240, "Basic bypass: " .. (unreliablebattery and "On" or "Off") .. " [TRIANGLE]", 0.5,
+        color.new(200, 200, 200), color.new(50, 42, 24))
 
     local pct = batt.lifepercent() or 0
     local isCharging = batt.charging()
     if pct < 100 then
-        screen.print(220, 120, "CHARGE TO 100%", 0.6, color.new(222, 222, 222))
-        screen.print(200, 140, "FORCE START [" .. pct .. "%] BY SELECT", 0.4, color.new(50, 42, 24))
+        utils.drawTextWithShadow(220, 120, "CHARGE TO 100%", 0.6, color.new(222, 222, 222), color.new(50, 42, 24))
+        utils.drawTextWithShadow(200, 140, "FORCE START [" .. pct .. "%] BY SELECT", 0.4, color.new(222, 222, 222),
+            color.new(50, 42, 24))
     elseif pct >= 100 then
         if isCharging then
-            screen.print(220, 150, "UNPLUG YOUR CHARGER!", 0.5, color.new(200, 200, 200))
+            utils.drawTextWithShadow(220, 150, "UNPLUG YOUR CHARGER!", 0.5, color.new(200, 200, 200),
+                color.new(50, 42, 24))
         else
-            screen.print(220, 180, "PRESS START TO BEGIN", 0.5, color.new(200, 200, 200))
+            utils.drawTextWithShadow(220, 180, "PRESS START TO BEGIN", 0.5, color.new(200, 200, 200),
+                color.new(50, 42, 24))
         end
     end
 
@@ -385,6 +314,7 @@ while true do
     os.delay(16)
 end
 
+collectgarbage()
 loading()
 
 -- shoutouts to laamaa for giving me the thumbsup to use he's music
@@ -395,12 +325,12 @@ function laamaa()
     if not intro then
         intro = sound.load("audio/laamaa-intro.mp3")
         loop = sound.load("audio/laamaa-loop.mp3")
-        sound.vol(intro, 60)
+        sound.vol(intro, 70)
         sound.play(intro)
         return
     end
     if not loopStarted and sound.endstream(intro) then
-        sound.vol(loop, 60)
+        sound.vol(loop, 70)
         sound.play(loop)
         sound.loop(loop)
         loopStarted = true
@@ -409,8 +339,14 @@ end
 
 local lastLog, fps, elapsedSeconds, lastUpdateTime, headerWritten = os.time(), 0, 0, os.time(), false
 local o = 0 -- offset
-
+if config.batterysteve.showmspf then
+    FrameTime = 0
+    FrameE = 0
+end
 while true do
+    if config.batterysteve.showmspf then
+        FrameE = os.clock()
+    end
     amg.begin()
     if musicenabled then laamaa() end
     screen.clear(color.new(20, 20, 20))
@@ -420,7 +356,7 @@ while true do
     BallRotX = BallRotX + BallRotSpeedX
     BallRotY = BallRotY + BallRotSpeedY
     BallRotZ = BallRotZ + BallRotSpeedZ
-    model3d.rotation(Ball, 1, { BallRotX * 10, BallRotY * 10, BallRotZ * 10 })
+    model3d.rotation(Ball, 1, { BallRotX * 15, BallRotY * 15, BallRotZ * 15 })
 
     o = (o + 0.5) % 360
     local h = o / 60
@@ -442,26 +378,50 @@ while true do
     end
 
     -- render3d
-    amg.light(1, 1);
-    r, g, b = math.floor(r * 255), math.floor(g * 255), math.floor(b * 255)
-    local avgR, avgG, avgB = (r + g) / 2, (g + b) / 2, (b + r) / 2
-    amg.colorlight(1, color.new(r, g, b), color.new(b * 0.5, r * 0.5, g * 0.5),
-        color.new(avgR, avgG, avgB))
-    if not currentRotation then currentRotation = 0 end
-    currentRotation = (currentRotation + 0.5) % 360
-    local radius = 2.4
-    local camX = math.cos(math.rad(currentRotation)) * radius
-    local camZ = math.sin(math.rad(currentRotation)) * radius
-    cam3d.position(Camera, { camX, 2, camZ })
-    cam3d.set(Camera)
-    model3d.render(Plane)
+    amg.light(1, 1)
+    local minBrightness = 148
+    r = math.max(math.floor(r * 255 + 0.5), minBrightness)
+    g = math.max(math.floor(g * 255 + 0.5), minBrightness)
+    b = math.max(math.floor(b * 255 + 0.5), minBrightness)
+    local avgR = math.max(math.floor((r + g) / 2 + 0.5), minBrightness)
+    local avgG = math.max(math.floor((g + b) / 2 + 0.5), minBrightness)
+    local avgB = math.max(math.floor((b + r) / 2 + 0.5), minBrightness)
+    local halfB = b * 0.5
+    local halfR = r * 0.5
+    local halfG = g * 0.5
+    amg.colorlight(
+        1,
+        color.new(r, g, b, 255),
+        color.new(halfB, halfR, halfG, 128),
+        color.new(avgR, avgG, avgB, 192)
+    )
 
+    currentRotation = ((currentRotation or 0) + 0.5) % 360
+    local radius = 4.4
+    local rad = math.rad(currentRotation)
+    local sinR, cosR = math.sin(rad), math.cos(rad)
+    local camX = cosR * radius
+    local camZ = sinR * radius
+    local targetCamY = 4 + sinR * 0.35
+    local smoothingFactor = 0.05
+    camY = camY and (camY + (targetCamY - camY) * smoothingFactor) or targetCamY
+
+    cam3d.position(Camera, { camX, camY, camZ })
+    cam3d.eye(Camera, { 0, 0.85, 0 })
+    cam3d.set(Camera)
+
+    model3d.render(Plane)
+    model3d.startreflection(Plane, 1)
+    model3d.mirror(Ball, 1, 2)
+    model3d.finishreflection()
+    -- ball reflection model3d.blitshadow
     model3d.render(Ball)
     amg.light(1, 0);
 
 
-    cubeRotX, cubeRotY, cubeRotZ = cubeRotX + rotSpeedX, cubeRotY + rotSpeedY,
-        cubeRotZ + rotSpeedZ
+    cubeRotX = (cubeRotX + rotSpeedX) % 360
+    cubeRotY = (cubeRotY + rotSpeedY) % 360
+    cubeRotZ = (cubeRotZ + rotSpeedZ) % 360
 
     local now = os.time()
     local dt = now - lastUpdateTime
@@ -500,16 +460,11 @@ while true do
             f:write(logMessage .. "\n")
             f:close()
         end
-
         if not config.batterysteve.unreliablebattery then
-            screen.clear(color.new(40, 10, 10))
-            screen.print(240, 190, "BATTERY DIED", 0.7, color.new(255, 50, 50))
-            bigmsg(timeString)
-            screen.print(240, 210, "Press any button to exit...", 0.5,
-                color.new(200, 200, 200))
+            os.delay(200)
+            graph.draw_from_file(logFileName)
             screen.flip()
-            amg.update()
-
+            buttons.waitforkey(__START)
             while true do
                 buttons.read()
                 if buttons.cross or buttons.circle or buttons.triangle or
@@ -532,9 +487,8 @@ while true do
     end
 
     for _, p in ipairs(particles) do
-        p.x, p.y = p.x + p.vx, p.y + p.vy
-        if p.x < 0 or p.x > 480 then p.vx = -p.vx end
-        if p.y < 0 or p.y > 272 then p.vy = -p.vy end
+        p.x = (p.x + p.vx) % 480
+        p.y = (p.y + p.vy) % 272
         draw.fillrect(p.x - 1, p.y - 1, 2, 2, p.color)
     end
 
@@ -597,6 +551,7 @@ while true do
     end
 
     local battTemp = batt.temp() or 0
+
     if config.batterysteve.extraload then
         EqVal = calculateEquation(battPct)
     end
@@ -615,17 +570,19 @@ while true do
     screen.print(5, 8,
         "BATT: " .. battPct .. tempStr .. " | CPU: " .. os.cpu() .. "/" ..
         os.bus() .. " Mhz", 0.5, color.new(200, 200, 200))
-    local battLevel = tonumber(string.match(battPct, "(%d+)") or "0")
-    local barColor
-    if battLevel > 80 then
-        barColor = color.new(50, 200, 50)
-    elseif battLevel > 45 then
-        barColor = color.new(200, 200, 50)
-    else
-        barColor = color.new(200, 50, 50)
-    end
-    draw.fillrect(5, 25, 100, 3, color.new(50, 50, 50))
-    draw.fillrect(5, 25, battLevel, 3, barColor)
+
+    local battLevel = math.max(0, math.min(tonumber(battPct) or 0, 100))
+    local barWidth = math.floor(battLevel)
+    local colors = {
+        { color.new(50, 200, 50),  color.new(50, 180, 50),  color.new(30, 150, 30),  color.new(30, 130, 30) },
+        { color.new(200, 200, 50), color.new(180, 180, 50), color.new(150, 150, 30), color.new(130, 130, 30) },
+        { color.new(200, 50, 50),  color.new(180, 50, 50),  color.new(150, 30, 30),  color.new(130, 30, 30) }
+    }
+    local c = battLevel > 75 and colors[1] or (battLevel > 50 and colors[2] or colors[3])
+
+    draw.gradrect(5, 25, barWidth, 3, c[1], c[2], c[3], c[4])
+    draw.fillrect(5 + barWidth, 25, 100 - barWidth, 3, color.new(50, 50, 50))
+
     screen.print(5, 30,
         string.format("LEFT: %s", batt.lifetime()), 0.25, color.new(200, 200, 200))
 
@@ -657,6 +614,9 @@ while true do
     if model ~= "Go" and model ~= "Street" and model ~= "Emulator" then
         batteryStr = string.format("BAT: %s (%s) ", batremain, batvolt)
     end
+    if config.batterysteve.showmspf then
+        FrameTime = os.clock() - FrameE
+    end
 
     screen.print(5, 258,
         string.format("FPS:%d RUN:%s %s| %s %s", fps, timeString,
@@ -669,7 +629,11 @@ while true do
             logFile = io.open(logFileName, "w")
             if logFile then
                 local pspModel = hw.getmodel() .. "(" .. hw.gen() .. ", " .. hw.board() .. ")" or " "
-                local header = string.format("BatterySteve %s on %s\n", BSV, pspModel)
+                -- also gotta add cpu frequency and screen brightness to this:
+                local brightness = screen.brightness()
+                local cpufreq = os.cpu() .. "/" .. os.bus()
+                local header = string.format("BatterySteve %s on %s CPU:[%s] B:[%s]\n",
+                    BSV, pspModel, cpufreq, brightness)
                 logFile:write(header)
                 -- we write the header only once
                 headerWritten = true
@@ -695,10 +659,18 @@ while true do
     -- apparently some batteries will *die* randomly?
     -- lets keep a second copy for future reference
     if os.time() - lastBackup >= 31 then
-        if copyFile(logFileName, "score.old.bak.txt") then end
+        if copyFile(logFileName, "score.old.bak.txt") then
+            -- we do nothing here - just pass
+            print("useless")
+        end
         lastBackup = os.time()
     end
-
+    if config.batterysteve.showmspf then
+        local msPerFrame = string.format("%.2f", FrameTime * 1000)
+        screen.print(5, 241,
+            string.format("MS: %s", msPerFrame), 0.25, color.new(200, 200, 200))
+    end
+    amg.update()
     screen.flip()
 end
 
@@ -708,8 +680,3 @@ if musicenabled then
 end
 screen.clear(color.new(5, 60, 5))
 screen.flip()
-draw.fillrect(0, 0, 480, 272, color.new(40, 40, 40))
-screen.print(240, 150, "Terminated", 0.5, color.new(200, 200, 200))
-screen.print(240, 180, "Exiting in 5 seconds...", 0.5, color.new(200, 200, 200))
-screen.flip()
-os.delay(5000)

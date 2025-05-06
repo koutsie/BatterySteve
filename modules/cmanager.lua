@@ -7,6 +7,7 @@ do
             eastergg = false,
             cpu = 333,
             music = true,
+            showmspf = true,
             extraload = false,
             unreliablebattery = false,
         },
