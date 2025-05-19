@@ -55,7 +55,7 @@ if os.date("%d") == "01" and os.date("%m") == "04" then
     STEVE = true
 end
 TEST = false
-BSV = "1.2.3" -- one two three, battery steve is free
+BSV = "1.2.4"
 
 
 -- run config manager
@@ -459,9 +459,12 @@ while true do
             end
             f:write(logMessage .. "\n")
             f:close()
+            os.delay(200)
         end
         if not config.batterysteve.unreliablebattery then
-            os.delay(200)
+            -- believe me, this is the easiest way to
+            -- fix slow memory cards/sd cards.
+            os.delay(2000)
             graph.draw_from_file(logFileName)
             screen.flip()
             buttons.waitforkey(__START)
