@@ -55,7 +55,7 @@ if os.date("%d") == "01" and os.date("%m") == "04" then
     STEVE = true
 end
 TEST = false
-BSV = "1.2.4"
+BSV = "1.2.5"
 
 
 -- run config manager
@@ -73,6 +73,8 @@ if TEST then BSV = BSV .. " [TEST]" end
 
 -- graph module
 local graph = require("modules.graph")
+-- screenshot module
+local screenie = require("modules.screenie")
 -- custom splashes
 local splash = require("modules.splash")
 local splashes = {
@@ -464,7 +466,13 @@ while true do
         if not config.batterysteve.unreliablebattery then
             -- believe me, this is the easiest way to
             -- fix slow memory cards/sd cards.
-            os.delay(2000)
+            os.delay(2200)
+            graph.draw_from_file(logFileName)
+            screen.flip()
+            os.delay(100)
+            screenie.save_screenshot()
+            screen.flip()
+            os.delay(100)
             graph.draw_from_file(logFileName)
             screen.flip()
             buttons.waitforkey(__START)
