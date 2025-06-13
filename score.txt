@@ -1,1 +1,0 @@
-rt:00:00:00, batt:100, eq:-/-, fps:33, BATTERY_FAILURE

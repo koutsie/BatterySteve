@@ -35,7 +35,7 @@
             if copyFile(screenshot_path, newScreenshotPath) then
                 os.remove(screenshot_path)
                 os.delay(60)
-                os.message("Screenshot saved to " .. newScreenshotPath)
+                os.message("Screenshot saved!")
             else
                 os.message("Failed to save screenshot.")
             end
