@@ -6,9 +6,11 @@ Notes for OneLua developers:
 
 
 Thanks to the Onelua Team.
-Big ups to the testers who provided battery data for me to chart.
+Big ups to the testers who provided battery data for me to chart, you too - if you do it!
 Check out the PSP Homebrew Community: https://discord.gg/bePrj9W
 Shoutouts to Quadruple for being a rubber duck debugger.
+Shoutouts to Total Kommando for testing BatterySteve so much and coming up with good ideas.
+Thank you to PrincessOfSleeping for translating to JP.
 Special thanks to Pinja for their support <3
 
 

@@ -3,7 +3,6 @@
 -- Homeage: https://the-sauna.icu/BatterySteve/
 -- Fedi/Mastodon: https://layer8.space/@k
 -- Report is saved as score.old.txt
--- config
 
 function loading()
     screen.txtcolor(color.new(30, 30, 30))
@@ -216,6 +215,56 @@ local bg = image.load("/images/bg.gif")
 image.resize(bg, 480, 272)
 
 -- wait for full charge
+
+
+-- brightness values
+-- psp 3000 and go: 44, 60, 72, 84
+-- psp 2000: 36, 44, 56, 68
+-- psp 100: 24, 40, 72, 100
+-- psp street:  32, 40, 48 (no fourth value?)
+
+local function getBrightnessLevelsForModel()
+    local model = hw.getmodel()
+    if model == "3000" or model == "Go" then
+        return { 44, 60, 72, 84 }
+    elseif model == "2000" then
+        return { 36, 44, 56, 68 }
+    elseif model == "1000" then
+        return { 24, 40, 72, 100 }
+    elseif model == "Street" then
+        return { 32, 40, 48 }
+    else
+        return { 20, 40, 60, 80, 100 }
+    end
+end
+
+local brightnessLevels = getBrightnessLevelsForModel()
+
+local function level_to_percent(level)
+    level = tonumber(level) or 5
+    if level < 1 then level = 1 end
+    if level > 5 then level = 5 end
+    return brightnessLevels[level] or 100
+end
+
+local function percent_to_level(p)
+    p = tonumber(p) or 100
+    if p <= 20 then return 1 end
+    if p <= 40 then return 2 end
+    if p <= 60 then return 3 end
+    if p <= 80 then return 4 end
+    return 5
+end
+
+local current_hw_level = tonumber(screen.brightness()) or 5
+if current_hw_level > 5 then
+    current_hw_level = percent_to_level(current_hw_level)
+end
+if current_hw_level < 1 or current_hw_level > 5 then current_hw_level = 5 end
+local brightnessIndex = current_hw_level
+local brightnessPercent = level_to_percent(brightnessIndex)
+screen.brightness(level_to_percent(brightnessIndex))
+
 while true do
     buttons.read()
 
@@ -235,8 +284,15 @@ while true do
         unreliablebattery = not unreliablebattery
         os.delay(16)
     end
-    if buttons.start and batt.lifepercent() >= 100 and not batt.charging() then
-        break
+    if buttons.square then
+        screen.display(1)
+        local fw_bright = tonumber(screen.brightness()) or brightnessPercent
+        local fw_level = percent_to_level(fw_bright)
+        brightnessIndex = fw_level + 1
+        if brightnessIndex > #brightnessLevels then brightnessIndex = 1 end
+        screen.brightness(level_to_percent(brightnessIndex))
+        brightnessPercent = level_to_percent(brightnessIndex)
+        os.delay(16)
     end
 
     if bg then
@@ -277,6 +333,8 @@ while true do
         end
     end
 
+
+
     screen.txtcolor(color.new(200, 200, 200))
     screen.txtbgcolor(color.new(20, 20, 20))
     screen.consolexy(1, 1)
@@ -291,6 +349,16 @@ while true do
         color.new(50, 42, 24))
     utils.drawTextWithShadow(220, 240, "Basic bypass: " .. (unreliablebattery and "On" or "Off") .. " [TRIANGLE]", 0.5,
         color.new(200, 200, 200), color.new(50, 42, 24))
+    utils.drawTextWithShadow(220, 260, "Brightness: " .. brightnessPercent .. "% [SQUARE]", 0.5,
+        color.new(200, 200, 200), color.new(50, 42, 24))
+
+    local barMax = 80
+    local barHeight = 8
+    local barX = 220
+    local barY = 275
+    local barFill = math.floor((brightnessPercent / 100) * barMax)
+    draw.fillrect(barX, barY, barMax, barHeight, color.new(50, 50, 50))
+    draw.fillrect(barX, barY, barFill, barHeight, color.new(200, 200, 80))
 
     local pct = batt.lifepercent() or 0
     local isCharging = batt.charging()
@@ -350,6 +418,17 @@ local ui_visible = true
 local ui_last_action = os.time()
 local ui_timeout = 30
 
+local hb_last_trigger = os.time()
+local hb_running = false
+local hb_pattern = "duDumDuDUm"
+local hb_pos = 1
+local hb_char_durations = { d = 0.08, u = 0.08, D = 0.25, U = 0.25, m = 0.15 }
+local hb_next_step_time = 0
+local hb_current_state = 1
+if config.autotest.enabled and hw and hw.led then
+    hw.led(2, 1)
+end
+
 function drawrect_ui(...)
     if ui_visible then
         draw.fillrect(...)
@@ -373,7 +452,7 @@ while true do
     if buttons.select and buttons.start then break end
 
     local any_button = buttons.cross or buttons.circle or buttons.triangle or buttons.square or buttons.start or
-    buttons.select or buttons.l or buttons.r
+        buttons.select or buttons.l or buttons.r
     if any_button then
         ui_visible = true
         ui_last_action = os.time()
@@ -469,6 +548,32 @@ while true do
     fps = screen.fps()
     battPct = batt.lifepercent() or 0
     local remainCap = batt.remaincap()
+    if config.autotest.enabled and hw and hw.led then
+        local nowc = os.clock()
+        if not hb_running and os.time() - hb_last_trigger >= 5 then
+            hb_running = true
+            hb_pos = 1
+            hb_next_step_time = nowc
+            hb_current_state = 0
+            hw.led(2, hb_current_state)
+            hb_last_trigger = os.time()
+        end
+        if hb_running then
+            if nowc >= hb_next_step_time then
+                hb_current_state = 1 - hb_current_state
+                hw.led(2, hb_current_state)
+                local ch = hb_pattern:sub(hb_pos, hb_pos)
+                local dur = hb_char_durations[ch] or 0.08
+                hb_next_step_time = nowc + dur
+                hb_pos = hb_pos + 1
+                if hb_pos > #hb_pattern then
+                    hb_running = false
+                    hw.led(2, 1)
+                end
+            end
+        end
+    end
+
     -- if we've ran out of battery and wake back up we conclude that
     -- we must've ran out of battery
     -- but if unreliablebattery is set to true we just ignore it (because some batteries report 0 / 0 anyway ??)
@@ -666,11 +771,17 @@ while true do
             logFile = io.open(logFileName, "w")
             if logFile then
                 local pspModel = hw.getmodel() .. "(" .. hw.gen() .. ", " .. hw.board() .. ")" or " "
-                -- also gotta add cpu frequency and screen brightness to this:
-                local brightness = screen.brightness()
+                -- also gotta add cpu frequency and screen brightness to this - done?:
+                local raw_hw_brightness = tonumber(screen.brightness()) or brightnessIndex
+                local real_hw_level = raw_hw_brightness
+                if raw_hw_brightness > 4 then
+                    real_hw_level = percent_to_level(raw_hw_brightness)
+                end
+                if real_hw_level < 1 or real_hw_level > 4 then real_hw_level = brightnessIndex end
+                local brightness_for_header = level_to_percent(real_hw_level)
                 local cpufreq = os.cpu() .. "/" .. os.bus()
-                local header = string.format("BatterySteve %s on %s CPU:[%s] B:[%s]\n",
-                    BSV, pspModel, cpufreq, brightness)
+                local header = string.format("BatterySteve %s on %s CPU:[%s] B:[%s%%]\n",
+                    BSV, pspModel, cpufreq, brightness_for_header)
                 logFile:write(header)
                 -- we write the header only once
                 headerWritten = true

@@ -15,21 +15,28 @@ function splash.show(splashes, fade_steps, delay, display_time, config)
             else
                 screen.clear(0)
                 screen.flip()
+                screen.txtcolor(color.new(255, 30, 90))
                 for j = 0, fade_steps do
                     local a = math.floor((j / fade_steps) * 255)
                     image.blit(img, 0, 0, a)
+                    screen.consolexy(55, 1) 
+                    screen.consoleprint("Unskippable")
                     screen.flip()
                     os.delay(delay)
                 end
                 local start = os.time()
                 while os.time() - start < custom_time do
                     image.blit(img, 0, 0, 255)
+                    screen.consolexy(55, 1) 
+                    screen.consoleprint("Unskippable")
                     screen.flip()
                     os.delay(delay)
                 end
                 for j = fade_steps, 0, -1 do
                     local a = math.floor((j / fade_steps) * 255)
                     image.blit(img, 0, 0, a)
+                    screen.consolexy(55, 1)  
+                    screen.consoleprint("Unskippable")
                     screen.flip()
                     os.delay(delay)
                 end
