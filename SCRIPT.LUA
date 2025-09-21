@@ -55,7 +55,7 @@ if os.date("%d") == "01" and os.date("%m") == "04" then
     STEVE = true
 end
 TEST = false
-BSV = "1.2.5"
+BSV = "1.2.6"
 
 
 -- run config manager
@@ -345,6 +345,23 @@ if config.batterysteve.showmspf then
     FrameTime = 0
     FrameE = 0
 end
+
+local ui_visible = true
+local ui_last_action = os.time()
+local ui_timeout = 30
+
+function drawrect_ui(...)
+    if ui_visible then
+        draw.fillrect(...)
+    end
+end
+
+function screenprint_ui(...)
+    if ui_visible then
+        screen.print(...)
+    end
+end
+
 while true do
     if config.batterysteve.showmspf then
         FrameE = os.clock()
@@ -354,6 +371,15 @@ while true do
     screen.clear(color.new(20, 20, 20))
     buttons.read()
     if buttons.select and buttons.start then break end
+
+    local any_button = buttons.cross or buttons.circle or buttons.triangle or buttons.square or buttons.start or
+    buttons.select or buttons.l or buttons.r
+    if any_button then
+        ui_visible = true
+        ui_last_action = os.time()
+    elseif os.time() - ui_last_action > ui_timeout then
+        ui_visible = false
+    end
 
     BallRotX = BallRotX + BallRotSpeedX
     BallRotY = BallRotY + BallRotSpeedY
@@ -567,7 +593,7 @@ while true do
         EqVal = calculateEquation(battPct)
     end
 
-    draw.fillrect(0, 0, 480, 20, color.new(TEST and 120 or 40,
+    drawrect_ui(0, 0, 480, 20, color.new(TEST and 120 or 40,
         TEST and 60 or 40, TEST and 60 or 40))
     local tempStr
     if hw.getmodel() == "Go" then
@@ -578,7 +604,7 @@ while true do
         tempStr = " TEMP: " .. battTemp .. "*C"
     end
 
-    screen.print(5, 8,
+    screenprint_ui(5, 8,
         "BATT: " .. battPct .. tempStr .. " | CPU: " .. os.cpu() .. "/" ..
         os.bus() .. " Mhz", 0.5, color.new(200, 200, 200))
 
@@ -591,10 +617,10 @@ while true do
     }
     local c = battLevel > 75 and colors[1] or (battLevel > 50 and colors[2] or colors[3])
 
-    draw.gradrect(5, 25, barWidth, 3, c[1], c[2], c[3], c[4])
-    draw.fillrect(5 + barWidth, 25, 100 - barWidth, 3, color.new(50, 50, 50))
+    drawrect_ui(5, 25, barWidth, 3, c[1], c[2], c[3], c[4])
+    drawrect_ui(5 + barWidth, 25, 100 - barWidth, 3, color.new(50, 50, 50))
 
-    screen.print(5, 30,
+    screenprint_ui(5, 30,
         string.format("LEFT: %s", batt.lifetime()), 0.25, color.new(200, 200, 200))
 
     if batt.charging() then
@@ -605,7 +631,7 @@ while true do
             color.new(50, 50, 50))
     end
 
-    draw.fillrect(0, 250, 480, 22, color.new(TEST and 120 or 40,
+    drawrect_ui(0, 250, 480, 22, color.new(TEST and 120 or 40,
         TEST and 60 or 40,
         TEST and 40 or 40))
 
@@ -629,7 +655,7 @@ while true do
         FrameTime = os.clock() - FrameE
     end
 
-    screen.print(5, 258,
+    screenprint_ui(5, 258,
         string.format("FPS:%d RUN:%s %s| %s %s", fps, timeString,
             batteryStr, string.upper(hwgen), string.upper(model)), 0.40,
         color.new(200, 200, 200))
@@ -678,7 +704,7 @@ while true do
     end
     if config.batterysteve.showmspf then
         local msPerFrame = string.format("%.2f", FrameTime * 1000)
-        screen.print(5, 241,
+        screenprint_ui(5, 241,
             string.format("MS: %s", msPerFrame), 0.25, color.new(200, 200, 200))
     end
     amg.update()
