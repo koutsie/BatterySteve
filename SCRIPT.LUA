@@ -63,7 +63,7 @@ if os.date("%d") == "01" and os.date("%m") == "04" then
     STEVE = true
 end
 TEST = false
-BSV = "1.2.6-2-beta"
+BSV = "1.2.6-3-beta"
 
 -- config manager
 config = require("modules/cmanager")
@@ -159,9 +159,40 @@ local function rotatePoint(p, ax, ay, az)
 end
 
 local SteveImg
+local d = os.date("*t")
+local m, day = d.month, d.day
+
 if STEVE then
     SteveImg = image.load("/images/stevee.png")
     image.fliph(SteveImg)
+    -- one of the things of all time:
+    -- Spring(4/20-27), Summer(7/13-20), Fall(10/5-12), Halloween(10/25-31), Christmas(12/8-25) & NewYear(12/26-1/1)
+    -- And of course, MrMario2011 (8/12)
+    local seasonal
+    if m == 10 and day >= 25 then
+        seasonal = "steve_halloween.png"
+    elseif m == 12 and day >= 8 and day <= 25 then
+        seasonal = "steve_christmas.png"
+    elseif m == 4 and day >= 20 and day <= 27 then
+        seasonal = "steve_spring.png"
+    elseif m == 7 and day >= 13 and day <= 20 then
+        seasonal = "steve_summer.png"
+    elseif m == 10 and day >= 5 and day <= 12 then
+        seasonal = "steve_fall.png"
+    elseif (m == 12 and day >= 26) or (m == 1 and day == 1) then
+        seasonal = "steve_newyear.png"
+    elseif m == 8 and day == 12 then
+        seasonal = "steve_mario.png"
+    end
+
+    if seasonal then
+        local temp = image.load("/images/" .. seasonal)
+        if temp then
+            image.destroy(SteveImg)
+            SteveImg = temp
+            image.fliph(SteveImg)
+        end
+    end
 end
 
 local function calculateEquation(b)
@@ -415,6 +446,10 @@ while true do
     screen.consoleprint("BatterySteve " .. BSV .. " by Koutsie")
     screen.consolexy(1, 2)
     screen.consoleprint("https://the-sauna.icu/BatterySteve/")
+    screen.consolexy(1, 3)
+    -- we wanna show board info here
+
+    screen.consoleprint("https://the-sauna.icu/BatterySteve/")
 
     utils.drawTextWithShadow(220, 170, "CPU: " .. cpuSpeed .. " MHz [L]", 0.5, color.new(200, 200, 200),
         color.new(50, 42, 24))
@@ -464,6 +499,7 @@ while true do
 
     if STEVE then
         image.blit(SteveImg, 0, 230)
+        -- STEVE
     end
 
     screen.flip()
@@ -483,12 +519,14 @@ function laamaa()
     if not intro then
         intro = sound.load("audio/laamaa-intro.mp3")
         loop = sound.load("audio/laamaa-loop.mp3")
-        sound.vol(intro, 70)
+        sound.vol(intro, 100)
+        -- so, the volume has been 70 this whole time, yeah.
+        -- i literally do not know why.
         sound.play(intro)
         return
     end
     if not loopStarted and sound.endstream(intro) then
-        sound.vol(loop, 70)
+        sound.vol(loop, 100)
         sound.play(loop)
         sound.loop(loop)
         loopStarted = true
@@ -651,7 +689,9 @@ while true do
         if not config.batterysteve.unreliablebattery then
             -- believe me, this is the easiest way to
             -- fix slow memory cards/sd cards.
-            os.delay(2200)
+            -- a few reports were not saved because of that - so - we
+            -- increased from 2200 to 2500.
+            os.delay(2500)
             graph.draw_from_file(logFileName)
             screen.flip()
             os.delay(100)
@@ -700,6 +740,9 @@ while true do
         draw.line(v1.x, v1.y, v2.x, v2.y, color.new(200, 200, 200))
     end
 
+    -- i wish id remember what i was cooking with this
+    -- but i cant really touch this now, as that'd throw off the previous
+    -- tests :D
     for _, m in ipairs(models) do
         m.rot.x, m.rot.y, m.rot.z = m.rot.x + m.rotSpeed.x,
             m.rot.y + m.rotSpeed.y,
@@ -882,6 +925,9 @@ if musicenabled then
     sound.stop(intro)
     sound.stop(loop)
 end
+
 screen.clear(color.new(5, 60, 5))
 screen.flip()
+
+-- i mean this does nothing here but why not.
 buttons.homepopup(1)

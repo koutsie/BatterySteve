@@ -40,17 +40,17 @@ function utils.calculateEquation(b, eqA, eqB, eqD, constrainValue)
 end
 
 function utils.hsvToRgb(h, s, v)
-    local c, i = v * s, h * 0.016666667 
+    local c, i = v * s, h * 0.016666667
     local x, m = c * (1 - math.abs(i % 2 - 1)), v - c
-    i = i - i % 1 
-    local rgb = (i == 0 and {c, x, 0}) or 
-                (i == 1 and {x, c, 0}) or 
-                (i == 2 and {0, c, x}) or 
-                (i == 3 and {0, x, c}) or 
-                (i == 4 and {x, 0, c}) or 
+    i = i - i % 1
+    local rgb = (i == 0 and {c, x, 0}) or
+                (i == 1 and {x, c, 0}) or
+                (i == 2 and {0, c, x}) or
+                (i == 3 and {0, x, c}) or
+                (i == 4 and {x, 0, c}) or
                 {c, 0, x}
-    return (rgb[1] + m) * 255, 
-           (rgb[2] + m) * 255, 
+    return (rgb[1] + m) * 255,
+           (rgb[2] + m) * 255,
            (rgb[3] + m) * 255
 end
 
