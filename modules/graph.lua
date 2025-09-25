@@ -5,7 +5,21 @@ local marked_targets = {}
 local target_color = color.new(180, 255, 180)
 local time_color = color.new(180, 180, 255)
 
+local function checkdata()
+            if not sec or not file then
+            local rectHeight = 272 * 0.33
+            draw.fillrect(0, rectHeight, 480, rectHeight, color.new(230, 50, 50))
+            local message = "no test data, failed!"
+            screen.print((480 - screen.textwidth(message, 1.0)) / 2, rectHeight + rectHeight / 2 - 1, message, 1.0,
+                color.new(50, 50, 50))
+            screen.flip()
+            os.delay(10000)
+            os.exit()
+        end
+end
+
 local function seconds_to_hhmm(sec)
+    checkdata()
     local h, m = math.floor(sec / 3600), math.floor((sec % 3600) / 60)
     return string.format("%02dh %02dm", h, m)
 end
@@ -33,6 +47,8 @@ function graph.draw_from_file(fileName)
     if not file then
         os.message("The file: " .. fileName .. " does not exist.")
     end
+
+    checkdata() -- ???
 
     for line in file:lines() do
         local t, p, v = line:match("rt:(%d+:%d+:%d+), batt:(%d+).*bV:([%d%.]+)V")

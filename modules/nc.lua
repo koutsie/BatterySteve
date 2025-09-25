@@ -114,6 +114,7 @@ function nc.run()
     screen.consolexy(1, 1)
     screen.consoleprint("hold down to check log")
     screen.flip()
+    os.delay(666)
 end
 
 function copyFile(source, dest)

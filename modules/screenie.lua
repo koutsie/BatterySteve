@@ -16,7 +16,7 @@
         os.delay(100)
         local screenshot_path = "screenshot.png"
         screen.shot(screenshot_path)
-        os.delay(60)
+        os.delay(80)
 
         local logMoveFolder = "logs"
         local runIndex = 1
@@ -28,13 +28,13 @@
         until not files.exists(logFolder) or runIndex > 1000
 
         files.mkdir(logFolder)
-        os.delay(60)
+        os.delay(80)
 
         local newScreenshotPath = string.format("%s/screenshot_%04d.png", logFolder, runIndex - 1)
         if files.exists(screenshot_path) then
             if copyFile(screenshot_path, newScreenshotPath) then
                 os.remove(screenshot_path)
-                os.delay(60)
+                os.delay(80)
                 os.message("Screenshot saved!")
             else
                 os.message("Failed to save screenshot.")
@@ -42,7 +42,7 @@
         else
             os.message("Screenshot file not found.")
         end
-        os.delay(60)
+        os.delay(80)
     end
 
     return screenie

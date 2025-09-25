@@ -4,6 +4,14 @@
 -- Fedi/Mastodon: https://layer8.space/@k
 -- Report is saved as score.old.txt
 
+
+-- special thanks to:
+-- nuclearkommando - ideas guy & early beta tester
+-- princessofsleeping - JP translation help
+-- laamaa - banger soundtrack!
+-- the entire PSP homebrew community for being awesome
+-- you - for using this software - send me your test results @koutsie on discord or mastodon (see above)
+
 function loading()
     screen.txtcolor(color.new(30, 30, 30))
     screen.consolexy(1, 1)
@@ -26,6 +34,7 @@ local logInterval = 30
 local eqA, eqB, eqD = 0.3, 0.2, 0.5
 local battPct = 100
 local battlifestimate = 0
+local bc = 0
 local cpuSpeed
 local unreliablebattery
 
@@ -54,10 +63,9 @@ if os.date("%d") == "01" and os.date("%m") == "04" then
     STEVE = true
 end
 TEST = false
-BSV = "1.2.6"
+BSV = "1.2.6-2-beta"
 
-
--- run config manager
+-- config manager
 config = require("modules/cmanager")
 
 musicenabled = config.batterysteve.music
@@ -65,16 +73,14 @@ unreliablebattery = config.batterysteve.unreliablebattery
 cpuSpeed = config.batterysteve.cpu
 os.cpu(cpuSpeed)
 
--- we have to run nc
+-- we have to run nc, ball.
 nc = require("modules/nc")
 nc.run()
 if TEST then BSV = BSV .. " [TEST]" end
 
--- graph module
+-- modules
 local graph = require("modules.graph")
--- screenshot module
 local screenie = require("modules.screenie")
--- custom splashes
 local splash = require("modules.splash")
 local splashes = {
     "/images/splash.png", "/images/laamaa.png", "/images/pspunk.png", "/images/nuclear.png"
@@ -82,12 +88,53 @@ local splashes = {
 local fade_steps, delay = 6, 10
 local display_time = 6000
 
-splash.show(splashes, fade_steps, delay, display_time, config)
 
 if hw.getmodel() == "Vita" then
-    screen.consoleprint("The PS Vita is not supported.")
-    os.delay(6000)
-    os.exit()
+    screen.consoleprint("The PS Vita is NOT SUPPORTED!")
+    screen.flip()
+    os.delay(6500)
+end
+
+-- dumb but we ball
+if BSV:find("-beta") then
+    screen.txtcolor(color.new(255, 100, 100))
+    screen.consolexy(3, 6)
+    screen.consoleprint("BatterySteve BETA build!")
+    screen.consolexy(3, 8)
+    screen.consoleprint("model: " .. hw.getmodel() .. " / gen: " .. hw.gen() .. " / board: " .. hw.board())
+    screen.consolexy(3, 9)
+    screen.consoleprint("spock: " .. hw.spock() .. " / tachyon: " .. hw.tachyon())
+    screen.consolexy(3, 10)
+    screen.consoleprint("kirk: " .. hw.kirk() .. " / fusecfg: " .. hw.fusecfg() .. " / fuseid: " .. hw.fuseid())
+    screen.consolexy(3, 11)
+    screen.consoleprint("pommel: " .. hw.pommel() .. " / baryon: " .. hw.baryon())
+    screen.consolexy(3, 12)
+    screen.consoleprint("factory fw: " ..
+        hw.ofwinitial() .. " / nandseed: " .. hw.nandseed() .. " / region: " .. hw.region())
+    screen.consolexy(3, 13)
+    screen.consoleprint("ram/total:" ..
+        math.floor(os.totalram() / 1024 / 1024) .. "MB / " .. math.floor(os.ram() / 1024 / 1024) .. "MB")
+    screen.txtcolor(color.new(255, 255, 25))
+    screen.consolexy(3, 18)
+    screen.consoleprint("this is FREE software, if you paid for this - you got scammed!")
+    screen.txtcolor(color.new(10, 25, 10))
+    screen.consolexy(0, 20)
+    screen.consoleprint("Special thanks to:")
+    screen.consolexy(0, 21)
+    screen.consoleprint(
+        "nuclearkommando, princessofsleeping, laamaa, krayzynez \nand the rest of the psp homebrew community \n\nlets try to keep the best portable \nconsole alive!"
+    )
+    screen.consolexy(0, 28)
+    screen.txtcolor(color.new(12, 120, 75))
+    screen.consoleprint("press start to continue")
+    screen.flip()
+    power.tick()
+    buttons.homepopup(0)
+    buttons.waitforkey(__START)
+end
+
+if not BSV:find("-beta") then
+    splash.show(splashes, fade_steps, delay, display_time, config)
 end
 
 local utils = require("modules.utils")
@@ -167,15 +214,6 @@ modelmod.addModel({
     { 1, 7 }, { 2, 8 }, { 3, 9 }, { 4, 10 }, { 5, 11 }, { 6, 12 }
 })
 
---[[ modelmod.addModel({
-    { 0, -30, 0 }, { 26, -15, 0 }, { 26, 15, 0 }, { 0, 30, 0 }, { -26, 15, 0 }, { -26, -15, 0 },
-    { 0, -30, -10 }, { 26, -15, -10 }, { 26, 15, -10 }, { 0, 30, -10 }, { -26, 15, -10 }, { -26, -15, -10 }
-}, {
-    { 1, 2 }, { 2, 3 }, { 3, 4 }, { 4, 5 }, { 5, 6 }, { 6, 1 },
-    { 7, 8 }, { 8, 9 }, { 9, 10 }, { 10, 11 }, { 11, 12 }, { 12, 7 },
-    { 1, 7 }, { 2, 8 }, { 3, 9 }, { 4, 10 }, { 5, 11 }, { 6, 12 }
-}) ]]
-
 if config.batterysteve.extraload then
     for i = 1, 30 do
         modelmod.addModel({
@@ -210,32 +248,56 @@ end
 
 collectgarbage()
 
--- load bg from images/bg.png
-local bg = image.load("/images/bg.gif")
+if BSV:find("-beta") then
+    bg = image.load("/images/beta.gif")
+else
+    bg = image.load("/images/bg.png")
+end
 image.resize(bg, 480, 272)
 
 -- wait for full charge
 
+-- rahh:
+local brightnessMap = {
+    -- 01g
+    ["TA-079v1"] = { 24, 40, 72, 100 },
+    ["TA-079v2"] = { 24, 40, 72, 100 },
+    ["TA-079v3"] = { 24, 40, 72, 100 },
+    ["TA-079v4"] = { 24, 40, 72, 100 },
+    ["TA-081v1"] = { 24, 40, 72, 100 },
+    ["TA-081v2"] = { 24, 40, 72, 100 },
+    ["TA-082"]   = { 24, 40, 72, 100 },
+    ["TA-086"]   = { 36, 48, 72, 92 },
+    ["TA-079v5"] = { 20, 40, 60, 80, 100 }, -- need data
 
--- brightness values
--- psp 3000 and go: 44, 60, 72, 84
--- psp 2000: 36, 44, 56, 68
--- psp 100: 24, 40, 72, 100
--- psp street:  32, 40, 48 (no fourth value?)
+    -- 02g
+    ["TA-085v1"] = { 36, 44, 56, 68 },
+    ["TA-085v2"] = { 36, 44, 56, 68 },
+    ["TA-088v2"] = { 36, 44, 56, 68 },
+    ["TA-088v3"] = { 36, 44, 56, 68 },
+    ["TA-088v1"] = { 20, 40, 60, 80, 100 }, -- need data
+    ["TA-090v1"] = { 20, 40, 60, 80, 100 }, -- need data
+
+    -- 03g–09g
+    ["TA-090v2"] = { 44, 60, 72, 84 },
+    ["TA-090v3"] = { 44, 60, 72, 84 },
+    ["TA-093v1"] = { 44, 60, 72, 84 },
+    ["TA-093v2"] = { 44, 60, 72, 84 },
+    ["TA-091"]   = { 44, 60, 72, 84 },
+    ["TA-095v3"] = { 44, 60, 72, 84 },
+    ["TA-095v2"] = { 44, 60, 72, 84 },
+    ["TA-092"]   = { 20, 40, 60, 80, 100 }, -- need data
+    ["TA-095v1"] = { 20, 40, 60, 80, 100 }, -- need data
+    ["TA-095v4"] = { 20, 40, 60, 80, 100 }, -- need data
+
+    -- 11g
+    ["TA-096"]   = { 32, 40, 48 },
+    ["TA-097"]   = { 32, 40, 48 },
+}
+
 
 local function getBrightnessLevelsForModel()
-    local model = hw.getmodel()
-    if model == "3000" or model == "Go" then
-        return { 44, 60, 72, 84 }
-    elseif model == "2000" then
-        return { 36, 44, 56, 68 }
-    elseif model == "1000" then
-        return { 24, 40, 72, 100 }
-    elseif model == "Street" then
-        return { 32, 40, 48 }
-    else
-        return { 20, 40, 60, 80, 100 }
-    end
+    return brightnessMap[hw.board()] or { 20, 40, 60, 80, 100 }
 end
 
 local brightnessLevels = getBrightnessLevelsForModel()
@@ -261,13 +323,14 @@ if current_hw_level > 5 then
     current_hw_level = percent_to_level(current_hw_level)
 end
 if current_hw_level < 1 or current_hw_level > 5 then current_hw_level = 5 end
+
 local brightnessIndex = current_hw_level
 local brightnessPercent = level_to_percent(brightnessIndex)
 screen.brightness(level_to_percent(brightnessIndex))
 
+
 while true do
     buttons.read()
-
     if buttons.select then
         break
     end
@@ -284,15 +347,26 @@ while true do
         unreliablebattery = not unreliablebattery
         os.delay(16)
     end
+
     if buttons.square then
         screen.display(1)
-        local fw_bright = tonumber(screen.brightness()) or brightnessPercent
-        local fw_level = percent_to_level(fw_bright)
-        brightnessIndex = fw_level + 1
+        local fb = tonumber(screen.brightness()) or brightnessPercent
+        local fl = percent_to_level(fb)
+        brightnessIndex = fl + 1
         if brightnessIndex > #brightnessLevels then brightnessIndex = 1 end
         screen.brightness(level_to_percent(brightnessIndex))
         brightnessPercent = level_to_percent(brightnessIndex)
         os.delay(16)
+        bc = 0
+    else
+        bc = bc + 1
+        if bc >= 60 then
+            local fb = tonumber(screen.brightness()) or brightnessPercent
+            local fl = percent_to_level(fb)
+            brightnessIndex = fl
+            brightnessPercent = level_to_percent(fl)
+            bc = 0
+        end
     end
 
     if bg then
@@ -333,23 +407,23 @@ while true do
         end
     end
 
-
-
+    buttons.homepopup(1)
     screen.txtcolor(color.new(200, 200, 200))
-    screen.txtbgcolor(color.new(20, 20, 20))
+    screen.txtbgcolor(color.new(93, 50, 43))
+    -- 93, 50, 43 vs 20, 20, 20
     screen.consolexy(1, 1)
     screen.consoleprint("BatterySteve " .. BSV .. " by Koutsie")
     screen.consolexy(1, 2)
     screen.consoleprint("https://the-sauna.icu/BatterySteve/")
 
-    utils.drawTextWithShadow(220, 200, "CPU: " .. cpuSpeed .. " MHz [L]", 0.5, color.new(200, 200, 200),
+    utils.drawTextWithShadow(220, 170, "CPU: " .. cpuSpeed .. " MHz [L]", 0.5, color.new(200, 200, 200),
         color.new(50, 42, 24))
-    utils.drawTextWithShadow(220, 220, "Music: " .. (musicenabled and "On" or "Off") .. " [R]", 0.5,
+    utils.drawTextWithShadow(220, 190, "Music: " .. (musicenabled and "On" or "Off") .. " [R]", 0.5,
         color.new(200, 200, 200),
         color.new(50, 42, 24))
-    utils.drawTextWithShadow(220, 240, "Basic bypass: " .. (unreliablebattery and "On" or "Off") .. " [TRIANGLE]", 0.5,
+    utils.drawTextWithShadow(220, 210, "Basic bypass: " .. (unreliablebattery and "On" or "Off") .. " [TRIANGLE]", 0.5,
         color.new(200, 200, 200), color.new(50, 42, 24))
-    utils.drawTextWithShadow(220, 260, "Brightness: " .. brightnessPercent .. "% [SQUARE]", 0.5,
+    utils.drawTextWithShadow(220, 230, "Brightness: " .. brightnessPercent .. "% [SQUARE]", 0.5,
         color.new(200, 200, 200), color.new(50, 42, 24))
 
     local barMax = 80
@@ -361,18 +435,30 @@ while true do
     draw.fillrect(barX, barY, barFill, barHeight, color.new(200, 200, 80))
 
     local pct = batt.lifepercent() or 0
+    local voltage = batt.volt() or 0
     local isCharging = batt.charging()
+    -- due to popular request, show it twice
+    local text = "Battery: " .. pct .. "%" .. " / " .. voltage .. "V | " .. (isCharging and "charging" or "not charging")
+    utils.drawTextWithShadow(5, 260, text, 0.25, color.new(200, 200, 200), color.new(50, 42, 24))
+
+
     if pct < 100 then
-        utils.drawTextWithShadow(220, 120, "CHARGE TO 100%", 0.6, color.new(222, 222, 222), color.new(50, 42, 24))
-        utils.drawTextWithShadow(200, 140, "FORCE START [" .. pct .. "%] BY SELECT", 0.4, color.new(222, 222, 222),
+        utils.drawTextWithShadow(220, 110, "CHARGE TO 100%", 0.6, color.new(222, 222, 222), color.new(50, 42, 24))
+        utils.drawTextWithShadow(200, 130, "FORCE START [" .. pct .. "%] BY SELECT", 0.4, color.new(222, 222, 222),
             color.new(50, 42, 24))
     elseif pct >= 100 then
         if isCharging then
-            utils.drawTextWithShadow(220, 150, "UNPLUG YOUR CHARGER!", 0.5, color.new(200, 200, 200),
+            utils.drawTextWithShadow(220, 140, "UNPLUG YOUR CHARGER!", 0.5, color.new(200, 200, 200),
                 color.new(50, 42, 24))
         else
-            utils.drawTextWithShadow(220, 180, "PRESS START TO BEGIN", 0.5, color.new(200, 200, 200),
-                color.new(50, 42, 24))
+            local t = os.clock() * 66
+            local hue = (t % 360)
+            local r, g, b = utils.hsvToRgb(hue, 1, 1)
+            utils.drawTextWithShadow(290, 15, "PRESS START TO BEGIN", 0.5, color.new(r, g, b), color.new(42, 42, 24))
+            if buttons.start then
+                break
+            end
+            os.delay(16)
         end
     end
 
@@ -381,11 +467,13 @@ while true do
     end
 
     screen.flip()
+    power.tick() -- keep the thing awake ffs :D
     os.delay(16)
 end
 
 collectgarbage()
 loading()
+buttons.homepopup(1)
 
 -- shoutouts to laamaa for giving me the thumbsup to use he's music
 -- go buy the track!
@@ -418,16 +506,6 @@ local ui_visible = true
 local ui_last_action = os.time()
 local ui_timeout = 30
 
-local hb_last_trigger = os.time()
-local hb_running = false
-local hb_pattern = "duDumDuDUm"
-local hb_pos = 1
-local hb_char_durations = { d = 0.08, u = 0.08, D = 0.25, U = 0.25, m = 0.15 }
-local hb_next_step_time = 0
-local hb_current_state = 1
-if config.autotest.enabled and hw and hw.led then
-    hw.led(2, 1)
-end
 
 function drawrect_ui(...)
     if ui_visible then
@@ -521,6 +599,7 @@ while true do
     model3d.startreflection(Plane, 1)
     model3d.mirror(Ball, 1, 2)
     model3d.finishreflection()
+
     -- ball reflection model3d.blitshadow
     model3d.render(Ball)
     amg.light(1, 0);
@@ -548,31 +627,6 @@ while true do
     fps = screen.fps()
     battPct = batt.lifepercent() or 0
     local remainCap = batt.remaincap()
-    if config.autotest.enabled and hw and hw.led then
-        local nowc = os.clock()
-        if not hb_running and os.time() - hb_last_trigger >= 5 then
-            hb_running = true
-            hb_pos = 1
-            hb_next_step_time = nowc
-            hb_current_state = 0
-            hw.led(2, hb_current_state)
-            hb_last_trigger = os.time()
-        end
-        if hb_running then
-            if nowc >= hb_next_step_time then
-                hb_current_state = 1 - hb_current_state
-                hw.led(2, hb_current_state)
-                local ch = hb_pattern:sub(hb_pos, hb_pos)
-                local dur = hb_char_durations[ch] or 0.08
-                hb_next_step_time = nowc + dur
-                hb_pos = hb_pos + 1
-                if hb_pos > #hb_pattern then
-                    hb_running = false
-                    hw.led(2, 1)
-                end
-            end
-        end
-    end
 
     -- if we've ran out of battery and wake back up we conclude that
     -- we must've ran out of battery
@@ -606,6 +660,7 @@ while true do
             os.delay(100)
             graph.draw_from_file(logFileName)
             screen.flip()
+            buttons.homepopup(0)
             buttons.waitforkey(__START)
             while true do
                 buttons.read()
@@ -619,6 +674,7 @@ while true do
                         screen.print(240, 220, "Score file backed up.", 0.4,
                             color.new(150, 150, 150))
                         screen.flip()
+                        buttons.homepopup(1)
                         os.delay(2000)
                     end
                     break
@@ -828,3 +884,4 @@ if musicenabled then
 end
 screen.clear(color.new(5, 60, 5))
 screen.flip()
+buttons.homepopup(1)
