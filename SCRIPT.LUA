@@ -63,7 +63,7 @@ if os.date("%d") == "01" and os.date("%m") == "04" then
     STEVE = true
 end
 TEST = false
-BSV = "1.2.6-4-beta"
+BSV = "1.2.6-5"
 
 -- config manager
 config = require("modules/cmanager")
@@ -284,7 +284,11 @@ collectgarbage()
 if BSV:find("-beta") then
     bg = image.load("/images/beta.gif")
 else
-    bg = image.load("/images/bg.png")
+    bg = image.load("/images/bg.gif")
+    -- 19:39:56 / 2.10.25: what the fuck was i thinking when i
+    -- put .png instead of .gif on the god damn imageload right there
+    -- lmao
+    -- k
 end
 image.resize(bg, 480, 272)
 
@@ -449,9 +453,7 @@ while true do
     screen.consolexy(1, 2)
     screen.consoleprint("https://the-sauna.icu/BatterySteve/")
     screen.consolexy(1, 3)
-    -- we wanna show board info here
-
-    screen.consoleprint("https://the-sauna.icu/BatterySteve/")
+    screen.consoleprint(hw.getmodel() .. " / gen: " .. hw.gen() .. " / board: " .. hw.board())
 
     utils.drawTextWithShadow(220, 170, "CPU: " .. cpuSpeed .. " MHz [L]", 0.5, color.new(200, 200, 200),
         color.new(50, 42, 24))
