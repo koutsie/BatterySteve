@@ -7,16 +7,60 @@ Notes for OneLua developers:
 
 Thanks to the Onelua Team.
 Big ups to the testers who provided battery data for me to chart, you too - if you do it!
+If you have battery data, send it to me: @koutsie on discord or @k@layer8.space OR see below and ping me there!
 Check out the PSP Homebrew Community: https://discord.gg/bePrj9W
+
 Shoutouts to Quadruple for being a rubber duck debugger.
 Shoutouts to Total Kommando for testing BatterySteve so much and coming up with good ideas.
 Thank you to PrincessOfSleeping for translating to JP.
 Special thanks to Pinja for their support <3
 
 
+The different PSP motherboards have different brightness values!
+There is no proper documentation and getting them from idstorage has proved to be a bit problematic...
+Current list (as of: Thu Oct  2 05:23:40 PM EEST 2025) is as follows:
+01g:
+    TA-079v1: 24, 40, 72, 100
+    TA-079v2: 24, 40, 72, 100
+    TA-079v3: 24, 40, 72, 100
+    TA-079v4: 24, 40, 72, 100
+    TA-081v1: 24, 40, 72, 100
+    TA-081v2: 24, 40, 72, 100
+    TA-082: 24, 40, 72, 100
+    TA-086: 36, 48, 72, 92
+    TA-079v5: 20, 40, 60, 80, 100 (NO DATA YET)
+
+02g:
+    TA-085v1: 36, 44, 56, 68
+    TA-085v2: 36, 44, 56, 68
+    TA-088v2: 36, 44, 56, 68
+    TA-088v3: 36, 44, 56, 68
+    TA-088v1: 20, 40, 60, 80, 100 (NO DATA YET)
+    TA-090v1: 20, 40, 60, 80, 100 (NO DATA YET)
+
+03g–09g:
+    TA-090v2: 44, 60, 72, 84
+    TA-090v3: 44, 60, 72, 84
+    TA-093v1: 44, 60, 72, 84
+    TA-093v2: 44, 60, 72, 84
+    TA-091: 44, 60, 72, 84
+    TA-095v3: 44, 60, 72, 84
+    TA-095v2: 44, 60, 72, 84
+    TA-092: 20, 40, 60, 80, 100 (NO DATA YET)
+    TA-095v1: 20, 40, 60, 80, 100 (NO DATA YET)
+    TA-095v4: 20, 40, 60, 80, 100 (NO DATA YET)
+
+11g:
+    TA-096: 32, 40, 48
+    TA-097: 32, 40, 48
+
+Devkits/Testkits:
+OneLua does not have a way to properly inform of those so... uhh - fucked on that front
+(yes the mobos are known but, this is just OL being shit).
+
 WIP:
 Release source code is minifed because that achieves a whopping 45.62% compression ratio (on average).
 For unminified source code, look at:
 
 https://git.sr.ht/~koutsie/BatterySteve/
-https://github.com/koutsie/BatterySteve/ [Mirror]
+https://github.com/PSP-Archive/BatterySteve/ [Mirror]

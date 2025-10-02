@@ -63,7 +63,7 @@ if os.date("%d") == "01" and os.date("%m") == "04" then
     STEVE = true
 end
 TEST = false
-BSV = "1.2.6-3-beta"
+BSV = "1.2.6-4-beta"
 
 -- config manager
 config = require("modules/cmanager")
@@ -166,11 +166,13 @@ if STEVE then
     SteveImg = image.load("/images/stevee.png")
     image.fliph(SteveImg)
     -- one of the things of all time:
-    -- Spring(4/20-27), Summer(7/13-20), Fall(10/5-12), Halloween(10/25-31), Christmas(12/8-25) & NewYear(12/26-1/1)
+    -- Spring(4/20-27), Summer(7/13-20), Fall(10/5-12), Halloween(10/25-31), Thanksgiving(11/23-29), Christmas(12/8-25) & NewYear(12/26-1/1)
     -- And of course, MrMario2011 (8/12)
     local seasonal
     if m == 10 and day >= 25 then
         seasonal = "steve_halloween.png"
+    elseif m == 11 and day >= 23 and day <= 29 then
+        seasonal = "steve_thanksgiving.png" -- idea by juladdr
     elseif m == 12 and day >= 8 and day <= 25 then
         seasonal = "steve_christmas.png"
     elseif m == 4 and day >= 20 and day <= 27 then
@@ -182,9 +184,9 @@ if STEVE then
     elseif (m == 12 and day >= 26) or (m == 1 and day == 1) then
         seasonal = "steve_newyear.png"
     elseif m == 8 and day == 12 then
-        seasonal = "steve_mario.png"
+        seasonal = "steve_mrmario.png"
+        -- changed the name because its not the plumber from the popular video game series.
     end
-
     if seasonal then
         local temp = image.load("/images/" .. seasonal)
         if temp then
