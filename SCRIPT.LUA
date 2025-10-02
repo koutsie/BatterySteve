@@ -6,11 +6,12 @@
 
 
 -- special thanks to:
+-- laamaa - for the banger soundtrack!
 -- nuclearkommando - ideas guy & early beta tester
 -- princessofsleeping - JP translation help
--- laamaa - banger soundtrack!
+-- krayzynez - figuring out the screen brightness per mobo issue
 -- the entire PSP homebrew community for being awesome
--- you - for using this software - send me your test results @koutsie on discord or mastodon (see above)
+-- you - for using this software - send me your test results @koutsie on discord or mastodon (see above) !
 
 function loading()
     screen.txtcolor(color.new(30, 30, 30))
@@ -63,7 +64,7 @@ if os.date("%d") == "01" and os.date("%m") == "04" then
     STEVE = true
 end
 TEST = false
-BSV = "1.2.6-5"
+BSV = "1.2.6-6"
 
 -- config manager
 config = require("modules/cmanager")
@@ -85,8 +86,8 @@ local splash = require("modules.splash")
 local splashes = {
     "/images/splash.png", "/images/laamaa.png", "/images/pspunk.png", "/images/nuclear.png"
 }
-local fade_steps, delay = 6, 10
-local display_time = 6000
+local fade_steps, delay = 5, 7
+local display_time = 5000
 
 
 if hw.getmodel() == "Vita" then
@@ -158,43 +159,41 @@ local function rotatePoint(p, ax, ay, az)
     return utils.rotatePoint(p, ax, ay, az)
 end
 
-local SteveImg
+local steeveimg
 local d = os.date("*t")
 local m, day = d.month, d.day
 
+-- one of the things of all time:
+-- Spring(4/20-27), Summer(7/13-20), Fall(10/5-12), Halloween(10/25-31), Thanksgiving(11/23-29), Christmas(12/8-25) & NewYear(12/26-1/1)
+-- And of course, MrMario2011 (8/12)
+local seasonal
+if m == 10 and day >= 25 then
+    seasonal = "steve_halloween.png"
+elseif m == 11 and day >= 23 and day <= 29 then
+    seasonal = "steve_thanksgiving.png" -- idea by juladdr
+elseif m == 12 and day >= 8 and day <= 25 then
+    seasonal = "steve_christmas.png"
+elseif m == 4 and day >= 20 and day <= 27 then
+    seasonal = "steve_spring.png"
+elseif m == 7 and day >= 13 and day <= 20 then
+    seasonal = "steve_summer.png"
+elseif m == 10 and day >= 5 and day <= 12 then
+    seasonal = "steve_fall.png"
+elseif (m == 12 and day >= 26) or (m == 1 and day == 1) then
+    seasonal = "steve_newyear.png"
+elseif m == 8 and day == 12 then
+    seasonal = "steve_mrmario.png"
+    -- changed the name because its not the plumber from the popular video game series.
+end
+
 if STEVE then
-    SteveImg = image.load("/images/stevee.png")
-    image.fliph(SteveImg)
-    -- one of the things of all time:
-    -- Spring(4/20-27), Summer(7/13-20), Fall(10/5-12), Halloween(10/25-31), Thanksgiving(11/23-29), Christmas(12/8-25) & NewYear(12/26-1/1)
-    -- And of course, MrMario2011 (8/12)
-    local seasonal
-    if m == 10 and day >= 25 then
-        seasonal = "steve_halloween.png"
-    elseif m == 11 and day >= 23 and day <= 29 then
-        seasonal = "steve_thanksgiving.png" -- idea by juladdr
-    elseif m == 12 and day >= 8 and day <= 25 then
-        seasonal = "steve_christmas.png"
-    elseif m == 4 and day >= 20 and day <= 27 then
-        seasonal = "steve_spring.png"
-    elseif m == 7 and day >= 13 and day <= 20 then
-        seasonal = "steve_summer.png"
-    elseif m == 10 and day >= 5 and day <= 12 then
-        seasonal = "steve_fall.png"
-    elseif (m == 12 and day >= 26) or (m == 1 and day == 1) then
-        seasonal = "steve_newyear.png"
-    elseif m == 8 and day == 12 then
-        seasonal = "steve_mrmario.png"
-        -- changed the name because its not the plumber from the popular video game series.
-    end
+    -- woops
     if seasonal then
-        local temp = image.load("/images/" .. seasonal)
-        if temp then
-            image.destroy(SteveImg)
-            SteveImg = temp
-            image.fliph(SteveImg)
-        end
+        steeveimg = image.load("/images/" .. seasonal)
+    else
+        steeveimg = image.load("/images/stevee.png")
     end
+    image.fliph(steeveimg)
 end
 
 local function calculateEquation(b)
@@ -281,15 +280,16 @@ end
 
 collectgarbage()
 
+bg = image.load("/images/bg.gif")
 if BSV:find("-beta") then
-    bg = image.load("/images/beta.gif")
-else
-    bg = image.load("/images/bg.gif")
-    -- 19:39:56 / 2.10.25: what the fuck was i thinking when i
-    -- put .png instead of .gif on the god damn imageload right there
-    -- lmao
-    -- k
+    image.fxgrey(bg)
 end
+
+-- 19:39:56 / 2.10.25: what the fuck was i thinking when i
+-- put .png instead of .gif on the god damn imageload right there
+-- lmao
+-- k
+
 image.resize(bg, 480, 272)
 
 -- wait for full charge
@@ -502,7 +502,7 @@ while true do
     end
 
     if STEVE then
-        image.blit(SteveImg, 0, 230)
+        image.blit(steeveimg, 0, 220)
         -- STEVE
     end
 
