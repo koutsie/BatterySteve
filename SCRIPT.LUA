@@ -64,7 +64,7 @@ if os.date("%d") == "01" and os.date("%m") == "04" then
     STEVE = true
 end
 TEST = false
-BSV = "1.2.6-6"
+BSV = "1.2.6-6.1"
 
 -- config manager
 config = require("modules/cmanager")
@@ -164,7 +164,7 @@ local d = os.date("*t")
 local m, day = d.month, d.day
 
 -- one of the things of all time:
--- Spring(4/20-27), Summer(7/13-20), Fall(10/5-12), Halloween(10/25-31), Thanksgiving(11/23-29), Christmas(12/8-25) & NewYear(12/26-1/1)
+-- Spring(4/20-27), Summer(7/13-20), Oktoberfest(9/20-10/5), Fall(10/5-12), Halloween(10/25-31), Thanksgiving(11/23-29), Christmas(12/8-25) & NewYear(12/26-1/1)
 -- And of course, MrMario2011 (8/12)
 local seasonal
 if m == 10 and day >= 25 then
@@ -177,6 +177,8 @@ elseif m == 4 and day >= 20 and day <= 27 then
     seasonal = "steve_spring.png"
 elseif m == 7 and day >= 13 and day <= 20 then
     seasonal = "steve_summer.png"
+elseif (m == 9 and day >= 20) or (m == 10 and day <= 5) then
+    seasonal = "steve_beer.png" -- almost forgot oktoberfest existed, shame on me...
 elseif m == 10 and day >= 5 and day <= 12 then
     seasonal = "steve_fall.png"
 elseif (m == 12 and day >= 26) or (m == 1 and day == 1) then
@@ -186,13 +188,13 @@ elseif m == 8 and day == 12 then
     -- changed the name because its not the plumber from the popular video game series.
 end
 
-if STEVE then
+if seasonal then
+    -- woops two, lets just always show the seasonal images
+    steeveimg = image.load("/images/" .. seasonal)
+    image.fliph(steeveimg)
+elseif STEVE then
     -- woops
-    if seasonal then
-        steeveimg = image.load("/images/" .. seasonal)
-    else
-        steeveimg = image.load("/images/stevee.png")
-    end
+    steeveimg = image.load("/images/stevee.png")
     image.fliph(steeveimg)
 end
 
@@ -501,7 +503,7 @@ while true do
         end
     end
 
-    if STEVE then
+    if steeveimg then
         image.blit(steeveimg, 0, 220)
         -- STEVE
     end
