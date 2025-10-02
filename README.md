@@ -1,3 +1,6 @@
+![Warning1](https://the-sauna.icu/BatterySteve/warning1.png)
+
+![Warning2](https://the-sauna.icu/BatterySteve/warning2.png)
 ## Download
 
 [Download BatterySteve](https://the-sauna.icu/BatterySteve/)
