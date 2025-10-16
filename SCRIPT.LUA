@@ -219,7 +219,7 @@ elseif STEVE then
     -- woops
     if not NUKE then
         steeveimg = image.load("/images/stevee.png")
-    else 
+    else
         steeveimg = image.load("/images/steve_nuke.png")
     end
     image.fliph(steeveimg)
@@ -248,7 +248,7 @@ Ball = model3d.load(files.cdir() .. "/3d/Data/Ball/ball.obj")
 local scaleValues = { 0.70, 0.70, 0.70 }
 model3d.scaling(Ball, 1, scaleValues)
 model3d.shading(Ball, 1)
-model3d.position(Ball, 1, { 0, 1, 0 })
+model3d.position(Ball, 1, { 0, 0.85, 0 })
 model3d.scaling(Plane, 1, { 0.5, 0.5, 0.5 })
 model3d.position(Plane, 1, { 0, -0.55, 0 })
 local BallRotX, BallRotY, BallRotZ = -360, 45, 32
@@ -697,28 +697,22 @@ while true do
     local halfG = g * 0.5
     amg.colorlight(
         1,
-        color.new(NUKE and 255 or r, NUKE and 255 or g, NUKE and 255 or b, 255),
-        color.new(NUKE and 255 or halfB, NUKE and 255 or halfR, NUKE and 255 or halfG, 128),
-        color.new(NUKE and 255 or avgR, NUKE and 255 or avgG, NUKE and 255 or avgB, 192)
+        NUKE and color.new(128, 128, 128, 255) or color.new(r, g, b, 255),
+        NUKE and color.new(128, 128, 128, 128) or color.new(halfB, halfR, halfG, 128),
+        NUKE and color.new(128, 128, 128, 192) or color.new(avgR, avgG, avgB, 192)
     )
 
-    currentRotation = ((currentRotation or 0) + 0.5) % 360
-    local radius = 4.4
-    local rad = math.rad(currentRotation)
-    local sinR, cosR = math.sin(rad), math.cos(rad)
-    local camX = cosR * radius
-    local camZ = sinR * radius
-    local targetCamY = 4 + sinR * 0.35
-    local smoothingFactor = 0.05
-    camY = camY and (camY + (targetCamY - camY) * smoothingFactor) or targetCamY
 
-    cam3d.position(Camera, { camX, camY, camZ })
-    cam3d.eye(Camera, { 0, 0.85, 0 })
+    -- rotate the plane, not the fucking camera lmao
+    currentRotation = ((currentRotation or 0) + 0.5) % 360
+    model3d.rotation(Plane, 1, { 0, -currentRotation, 0 })
+    cam3d.eye(Camera, { 0, 0.5, 0 })
+    cam3d.position(Camera, { 3, 3, 3 })
     cam3d.set(Camera)
 
     model3d.render(Plane)
     model3d.startreflection(Plane, 1)
-    model3d.mirror(Ball, 1, NUKE and 1 or 2)
+    model3d.mirror(Ball, 1, NUKE and 0 or 2)
     model3d.finishreflection()
 
     -- ball reflection model3d.blitshadow
@@ -876,7 +870,7 @@ while true do
             draw.line(
                 v1.x, v1.y, v2.x, v2.y,
                 draw.newcolor and
-                draw.newcolor(255, 255, 255) or
+                draw.newcolor(255 , 255, 255) or
                 color.new(255, 255, 255)
             )
         end
