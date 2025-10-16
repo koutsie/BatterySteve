@@ -181,34 +181,34 @@ local m, day = d.month, d.day
 -- Christmas(12/8-25) & NewYear(12/26-1/1), Spring(4/20-27), Minecraft(5/17)
 local seasonal
 if m == 2 and day == 14 then
-	seasonal = "steve_valentines.png"
+    seasonal = "steve_valentines.png"
 elseif m == 4 and day >= 20 and day <= 27 then
-	seasonal = "steve_spring.png"
+    seasonal = "steve_spring.png"
 elseif m == 5 and day == 17 then
-	seasonal = "steve_mc.png"
+    seasonal = "steve_mc.png"
 elseif m == 6 and day == 23 then
-	seasonal = "steve_sonic.png"
+    seasonal = "steve_sonic.png"
 elseif m == 7 and day >= 13 and day <= 20 then
-	seasonal = "steve_summer.png"
+    seasonal = "steve_summer.png"
 elseif m == 8 and day == 12 then
-	seasonal = "steve_mrmario.png"
-	-- changed the name because its not the plumber from the popular video game series.
+    seasonal = "steve_mrmario.png"
+    -- changed the name because its not the plumber from the popular video game series.
 elseif m == 8 and day >= 28 and day <= 31 then
-	seasonal = "steve_mgs.png"
+    seasonal = "steve_mgs.png"
 elseif (m == 9 and day >= 20) or (m == 10 and day <= 5) then
-	seasonal = "steve_beer.png" -- almost forgot oktoberfest existed, shame on me...
+    seasonal = "steve_beer.png" -- almost forgot oktoberfest existed, shame on me...
 elseif m == 10 and day >= 5 and day <= 12 then
-	seasonal = "steve_fall.png"
+    seasonal = "steve_fall.png"
 elseif m == 10 and day >= 25 then
-	seasonal = "steve_halloween.png"
+    seasonal = "steve_halloween.png"
 elseif m == 11 and day == 9 then
-	seasonal = "steve_gow.png"
+    seasonal = "steve_gow.png"
 elseif m == 11 and day >= 23 and day <= 29 then
-	seasonal = "steve_thanksgiving.png" -- idea by juladdr
+    seasonal = "steve_thanksgiving.png" -- idea by juladdr
 elseif m == 12 and day >= 8 and day <= 25 then
-	seasonal = "steve_christmas.png"
+    seasonal = "steve_christmas.png"
 elseif (m == 12 and day >= 26) or (m == 1 and day == 1) then
-	seasonal = "steve_newyear.png"
+    seasonal = "steve_newyear.png"
 end
 
 if seasonal then
@@ -424,7 +424,7 @@ screen.brightness(level_to_percent(brightnessIndex))
 
 while true do
     buttons.read()
-    if buttons.select  then
+    if buttons.select then
         break
     end
     if buttons.l and not NUKE then
@@ -544,26 +544,25 @@ while true do
     local pct = batt.lifepercent() or 0
     local voltage = batt.volt() or 0
     local isCharging = batt.charging()
-    -- due to popular request, show it twice
     local text = "Battery: " .. pct .. "%" .. " / " .. voltage .. "V | " .. (isCharging and "charging" or "not charging")
-    utils.drawTextWithShadow(5, 260, text, 0.25, color.new(200, 200, 200), color.new(0, 0, 0)) -- 50, 42, 24
-
+    utils.drawTextWithShadow(10, 260, string.upper(text), 0.25, color.new(200, 200, 200), color.new(0, 0, 0))
 
     if pct < 100 then
-        utils.drawTextWithShadow(220, 110, "CHARGE TO 100%", 0.6, color.new(222, 222, 222), color.new(50, 42, 24))
-        utils.drawTextWithShadow(200, 130, "FORCE START [" .. pct .. "%] BY SELECT", 0.4, color.new(222, 222, 222),
+        local chargeX, chargeY = NUKE and 225 or 220, NUKE and 183 or 110
+        local forceX, forceY = NUKE and 200 or 200, NUKE and 200 or 130
+        utils.drawTextWithShadow(chargeX, chargeY, "CHARGE TO 100%", 0.6, color.new(222, 222, 222), color.new(50, 42, 24))
+        utils.drawTextWithShadow(forceX, forceY, "FORCE START [" .. pct .. "%] BY SELECT", 0.4, color.new(222, 222, 222),
             color.new(50, 42, 24))
     elseif pct >= 100 then
         if isCharging then
-            utils.drawTextWithShadow(220, 140, "UNPLUG YOUR CHARGER!", 0.5, color.new(200, 200, 200),
+            local unplugX, unplugY = NUKE and 213 or 220, NUKE and 90 or 140
+            utils.drawTextWithShadow(unplugX, unplugY, "UNPLUG YOUR CHARGER!", 0.5, color.new(200, 200, 200),
                 color.new(50, 42, 24))
         else
             local t = os.clock() * 66
             local hue = (t % 360)
             local r, g, b = utils.hsvToRgb(hue, 1, 1)
-            if NUKE then
-                -- we do nothing :D
-            else
+            if not NUKE then
                 utils.drawTextWithShadow(295, 25, "PRESS START TO BEGIN", 0.5, color.new(r, g, b), color.new(42, 42, 24))
             end
             if buttons.start then
@@ -572,6 +571,7 @@ while true do
             os.delay(16)
         end
     end
+
 
     if steeveimg then
         image.blit(steeveimg, 0, 220)
@@ -592,7 +592,7 @@ buttons.homepopup(1)
 -- https://laamaa.fi/
 function laamaa()
     if not intro then
-        if NUKE then 
+        if NUKE then
             intro = sound.load("audio/NUKE/nuke-intro.mp3")
             loop = sound.load("audio/NUKE/nuke-loop.mp3")
         else
@@ -887,7 +887,7 @@ while true do
     end
 
     drawrect_ui(0, 0, 480, 20, color.new(
-        NUKE and 115 or (TEST and 60 or 40),
+        NUKE and 64 or (TEST and 60 or 40),
         NUKE and 0 or (TEST and 40 or 40),
         NUKE and 0 or (TEST and 40 or 40)
     ))
@@ -940,7 +940,7 @@ while true do
     end
 
     drawrect_ui(0, 250, 480, 22, color.new(
-        NUKE and 115 or (TEST and 60 or 40),
+        NUKE and 64 or (TEST and 60 or 40),
         NUKE and 0 or (TEST and 40 or 40),
         NUKE and 0 or (TEST and 40 or 40)
     ))
