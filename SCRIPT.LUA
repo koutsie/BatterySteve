@@ -213,7 +213,6 @@ end
 
 if seasonal then
     -- woops two, lets just always show the seasonal images
-    os.message(seasonal)
     steeveimg = image.load("/images/" .. seasonal)
     image.fliph(steeveimg)
 elseif STEVE then
