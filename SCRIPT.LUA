@@ -211,13 +211,17 @@ elseif (m == 12 and day >= 26) or (m == 1 and day == 1) then
     seasonal = "steve_newyear.png"
 end
 
-if seasonal then
+if seasonal and not NUKE then
     -- woops two, lets just always show the seasonal images
     steeveimg = image.load("/images/" .. seasonal)
     image.fliph(steeveimg)
 elseif STEVE then
     -- woops
-    steeveimg = image.load("/images/stevee.png")
+    if not NUKE then
+        steeveimg = image.load("/images/stevee.png")
+    else 
+        steeveimg = image.load("/images/steve_nuke.png")
+    end
     image.fliph(steeveimg)
 end
 
@@ -693,11 +697,10 @@ while true do
     local halfG = g * 0.5
     amg.colorlight(
         1,
-        color.new(NUKE and 255 or r, NUKE and 0 or g, NUKE and 0 or b, 255),
-        color.new(NUKE and 128 or halfB, NUKE and 0 or halfR, NUKE and 0 or halfG, 128),
-        color.new(NUKE and 192 or avgR, NUKE and 0 or avgG, NUKE and 0 or avgB, 192)
+        color.new(NUKE and 255 or r, NUKE and 255 or g, NUKE and 255 or b, 255),
+        color.new(NUKE and 255 or halfB, NUKE and 255 or halfR, NUKE and 255 or halfG, 128),
+        color.new(NUKE and 255 or avgR, NUKE and 255 or avgG, NUKE and 255 or avgB, 192)
     )
-
 
     currentRotation = ((currentRotation or 0) + 0.5) % 360
     local radius = 4.4
