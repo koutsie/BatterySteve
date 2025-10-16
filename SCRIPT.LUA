@@ -14,7 +14,7 @@
 -- you - for using this software - send me your test results @koutsie on discord or mastodon (see above) !
 
 function loading()
-    screen.txtcolor(color.new(30, 30, 30))
+    screen.txtcolor(color.new(60, 30, 30))
     screen.consolexy(1, 1)
     screen.consoleprint("Loading...")
     screen.flip()
@@ -64,11 +64,12 @@ if os.date("%d") == "01" and os.date("%m") == "04" then
     STEVE = true
 end
 TEST = false
-BSV = "1.2.6-6.1"
+BSV = "1.2.6-eggy"
 
 -- config manager
 config = require("modules/cmanager")
 
+NUKE = config.batterysteve.nuke
 musicenabled = config.batterysteve.music
 unreliablebattery = config.batterysteve.unreliablebattery
 cpuSpeed = config.batterysteve.cpu
@@ -78,14 +79,24 @@ os.cpu(cpuSpeed)
 nc = require("modules/nc")
 nc.run()
 if TEST then BSV = BSV .. " [TEST]" end
+if NUKE then BSV = BSV .. "[NUKE]" end
 
 -- modules
 local graph = require("modules.graph")
 local screenie = require("modules.screenie")
 local splash = require("modules.splash")
-local splashes = {
-    "/images/splash.png", "/images/laamaa.png", "/images/pspunk.png", "/images/nuclear.png"
-}
+local splashes
+if NUKE then
+    splashes = { "/images/nuclear.png" }
+else
+    splashes = {
+        "/images/splash.png",
+        "/images/laamaa.png",
+        "/images/pspunk.png",
+        "/images/nuclear.png"
+    }
+end
+
 local fade_steps, delay = 5, 7
 local display_time = 5000
 
@@ -164,32 +175,45 @@ local d = os.date("*t")
 local m, day = d.month, d.day
 
 -- one of the things of all time:
--- Spring(4/20-27), Summer(7/13-20), Oktoberfest(9/20-10/5), Fall(10/5-12), Halloween(10/25-31), Thanksgiving(11/23-29), Christmas(12/8-25) & NewYear(12/26-1/1)
--- And of course, MrMario2011 (8/12)
+-- Valentine's(2/14), Sonic(6/23), Summer(7/13-20), Metal Gear(8/28-31),
+-- MrMario2011(8/12), Oktoberfest(9/20-10/5), Fall(10/5-12),
+-- Halloween(10/25-31), God of War(11/9), Thanksgiving(11/23-29),
+-- Christmas(12/8-25) & NewYear(12/26-1/1), Spring(4/20-27), Minecraft(5/17)
 local seasonal
-if m == 10 and day >= 25 then
-    seasonal = "steve_halloween.png"
-elseif m == 11 and day >= 23 and day <= 29 then
-    seasonal = "steve_thanksgiving.png" -- idea by juladdr
-elseif m == 12 and day >= 8 and day <= 25 then
-    seasonal = "steve_christmas.png"
+if m == 2 and day == 14 then
+	seasonal = "steve_valentines.png"
 elseif m == 4 and day >= 20 and day <= 27 then
-    seasonal = "steve_spring.png"
+	seasonal = "steve_spring.png"
+elseif m == 5 and day == 17 then
+	seasonal = "steve_mc.png"
+elseif m == 6 and day == 23 then
+	seasonal = "steve_sonic.png"
 elseif m == 7 and day >= 13 and day <= 20 then
-    seasonal = "steve_summer.png"
-elseif (m == 9 and day >= 20) or (m == 10 and day <= 5) then
-    seasonal = "steve_beer.png" -- almost forgot oktoberfest existed, shame on me...
-elseif m == 10 and day >= 5 and day <= 12 then
-    seasonal = "steve_fall.png"
-elseif (m == 12 and day >= 26) or (m == 1 and day == 1) then
-    seasonal = "steve_newyear.png"
+	seasonal = "steve_summer.png"
 elseif m == 8 and day == 12 then
-    seasonal = "steve_mrmario.png"
-    -- changed the name because its not the plumber from the popular video game series.
+	seasonal = "steve_mrmario.png"
+	-- changed the name because its not the plumber from the popular video game series.
+elseif m == 8 and day >= 28 and day <= 31 then
+	seasonal = "steve_mgs.png"
+elseif (m == 9 and day >= 20) or (m == 10 and day <= 5) then
+	seasonal = "steve_beer.png" -- almost forgot oktoberfest existed, shame on me...
+elseif m == 10 and day >= 5 and day <= 12 then
+	seasonal = "steve_fall.png"
+elseif m == 10 and day >= 25 then
+	seasonal = "steve_halloween.png"
+elseif m == 11 and day == 9 then
+	seasonal = "steve_gow.png"
+elseif m == 11 and day >= 23 and day <= 29 then
+	seasonal = "steve_thanksgiving.png" -- idea by juladdr
+elseif m == 12 and day >= 8 and day <= 25 then
+	seasonal = "steve_christmas.png"
+elseif (m == 12 and day >= 26) or (m == 1 and day == 1) then
+	seasonal = "steve_newyear.png"
 end
 
 if seasonal then
     -- woops two, lets just always show the seasonal images
+    os.message(seasonal)
     steeveimg = image.load("/images/" .. seasonal)
     image.fliph(steeveimg)
 elseif STEVE then
@@ -211,8 +235,13 @@ amg.perspective(46.0)
 amg.typelight(1, __DIRECTIONAL)
 amg.colorlight(1, color.new(50, 50, 50), color.new(100, 100, 100), color.new(200, 200, 200))
 amg.poslight(1, { 1, 4, 1 })
-Plane = model3d.load(files.cdir() .. "/3d/Data/Plane/plane.obj")
+if not NUKE then
+    Plane = model3d.load(files.cdir() .. "/3d/Data/Plane/plane.obj")
+else
+    Plane = model3d.load(files.cdir() .. "/3d/Data/NUKE/plane.obj")
+end
 Ball = model3d.load(files.cdir() .. "/3d/Data/Ball/ball.obj")
+
 local scaleValues = { 0.70, 0.70, 0.70 }
 model3d.scaling(Ball, 1, scaleValues)
 model3d.shading(Ball, 1)
@@ -226,18 +255,41 @@ local modelmod = require("modules/modelmod")
 modelmod.init(baseVerts, baseEdges, cubePosX, cubePosY, cubeRotX, cubeRotY, cubeRotZ, rotSpeedX, rotSpeedY, rotSpeedZ)
 
 -- floaties
-modelmod.addModel({
-    { -30, -30, 0 }, { 0, -40, 0 }, { 30, -30, 0 }, { 40, 0, 0 },
-    { 30,  30,  0 }, { 0, 40, 0 }, { -30, 30, 0 }, { -40, 0, 0 },
-    { -20, 10, 5 }, { -10, 10, 5 }, { -10, 20, 5 }, { -20, 20, 5 },
-    { 10,  10, 5 }, { 20, 10, 5 }, { 20, 20, 5 }, { 10, 20, 5 },
-    { -20, -10, 5 }, { -10, -20, 5 }, { 10, -20, 5 }, { 20, -10, 5 }
-}, {
-    { 1, 2 }, { 2, 3 }, { 3, 4 }, { 4, 5 }, { 5, 6 }, { 6, 7 }, { 7, 8 }, { 8, 1 },
-    { 9, 10 }, { 10, 11 }, { 11, 12 }, { 12, 9 },
-    { 13, 14 }, { 14, 15 }, { 15, 16 }, { 16, 13 },
-    { 17, 18 }, { 18, 19 }, { 19, 20 }
-})
+if not NUKE then
+    modelmod.addModel({
+        { -30, -30, 0 }, { 0, -40, 0 }, { 30, -30, 0 }, { 40, 0, 0 },
+        { 30,  30,  0 }, { 0, 40, 0 }, { -30, 30, 0 }, { -40, 0, 0 },
+        { -20, 10, 5 }, { -10, 10, 5 }, { -10, 20, 5 }, { -20, 20, 5 },
+        { 10,  10, 5 }, { 20, 10, 5 }, { 20, 20, 5 }, { 10, 20, 5 },
+        { -20, -10, 5 }, { -10, -20, 5 }, { 10, -20, 5 }, { 20, -10, 5 }
+    }, {
+        { 1, 2 }, { 2, 3 }, { 3, 4 }, { 4, 5 }, { 5, 6 }, { 6, 7 }, { 7, 8 }, { 8, 1 },
+        { 9, 10 }, { 10, 11 }, { 11, 12 }, { 12, 9 },
+        { 13, 14 }, { 14, 15 }, { 15, 16 }, { 16, 13 },
+        { 17, 18 }, { 18, 19 }, { 19, 20 }
+    })
+else
+    modelmod.addModel({
+        { -22.5, -22.5, 0 }, { 0, -30, 0 }, { 22.5, -22.5, 0 }, { 30, 0, 0 },
+        { 22.5,  22.5,  0 }, { 0, 30, 0 }, { -22.5, 22.5, 0 }, { -30, 0, 0 },
+
+        { -20,    17.5, 0 }, { -2.5, 17.5, 0 },
+        { -11.25, 17.5, 0 }, { -11.25, -17.5, 0 },
+
+        { 4,  17.5, 0 }, { 4, -17.5, 0 },
+        { 4,  0,    0 },
+        { 20, 17.5, 0 }, { 20, -17.5, 0 }
+    }, {
+        { 1,  2 }, { 2, 3 }, { 3, 4 }, { 4, 5 }, { 5, 6 }, { 6, 7 }, { 7, 8 }, { 8, 1 },
+
+        { 9,  10 },
+        { 11, 12 },
+        { 13, 14 },
+        { 13, 15 },
+        { 15, 16 },
+        { 15, 17 }
+    })
+end
 
 modelmod.addModel({
     { 0, -30, 15 }, { 26, -15, 15 }, { 26, 15, 15 }, { 0, 30, 15 }, { -26, 15, 15 }, { -26, -15, 15 },
@@ -282,7 +334,9 @@ end
 
 collectgarbage()
 
-bg = image.load("/images/bg.gif")
+local bg_path = NUKE and "/images/nuke.png" or "/images/bg.gif"
+bg = image.load(bg_path)
+image.resize(bg, 480, 272)
 if BSV:find("-beta") then
     image.fxgrey(bg)
 end
@@ -292,7 +346,7 @@ end
 -- lmao
 -- k
 
-image.resize(bg, 480, 272)
+
 
 -- wait for full charge
 
@@ -370,24 +424,24 @@ screen.brightness(level_to_percent(brightnessIndex))
 
 while true do
     buttons.read()
-    if buttons.select then
+    if buttons.select  then
         break
     end
-    if buttons.l then
+    if buttons.l and not NUKE then
         cpuSpeed = (cpuSpeed == 333) and 222 or 333
         os.cpu(cpuSpeed)
         os.delay(16)
     end
-    if buttons.r then
+    if buttons.r and not NUKE then
         musicenabled = not musicenabled
         os.delay(16)
     end
-    if buttons.triangle then
+    if buttons.triangle and not NUKE then
         unreliablebattery = not unreliablebattery
         os.delay(16)
     end
 
-    if buttons.square then
+    if buttons.square and not NUKE then
         screen.display(1)
         local fb = tonumber(screen.brightness()) or brightnessPercent
         local fl = percent_to_level(fb)
@@ -450,22 +504,34 @@ while true do
     screen.txtcolor(color.new(200, 200, 200))
     screen.txtbgcolor(color.new(93, 50, 43))
     -- 93, 50, 43 vs 20, 20, 20
-    screen.consolexy(1, 1)
-    screen.consoleprint("BatterySteve " .. BSV .. " by Koutsie")
-    screen.consolexy(1, 2)
-    screen.consoleprint("https://the-sauna.icu/BatterySteve/")
-    screen.consolexy(1, 3)
-    screen.consoleprint(hw.getmodel() .. " / gen: " .. hw.gen() .. " / board: " .. hw.board())
+    if not NUKE then
+        screen.consolexy(1, 1)
+        screen.consoleprint("BatterySteve " .. BSV .. " by Koutsie")
+        screen.consolexy(1, 2)
+        screen.consoleprint("https://the-sauna.icu/BatterySteve/")
+        screen.consolexy(1, 3)
+        screen.consoleprint(hw.getmodel() .. " / gen: " .. hw.gen() .. " / board: " .. hw.board())
+    else
+        screen.txtbgcolor(color.new(0, 0, 0))
+        screen.consolexy(1, 1)
+        screen.consoleprint("BATTERYSTEVE " .. string.upper(BSV) .. " EDITION BY KOUTSIE")
+        screen.consolexy(1, 2)
+        screen.consoleprint(string.upper(hw.getmodel() .. "  / " .. hw.board()))
+    end
 
-    utils.drawTextWithShadow(220, 170, "CPU: " .. cpuSpeed .. " MHz [L]", 0.5, color.new(200, 200, 200),
-        color.new(50, 42, 24))
-    utils.drawTextWithShadow(220, 190, "Music: " .. (musicenabled and "On" or "Off") .. " [R]", 0.5,
-        color.new(200, 200, 200),
-        color.new(50, 42, 24))
-    utils.drawTextWithShadow(220, 210, "Basic bypass: " .. (unreliablebattery and "On" or "Off") .. " [TRIANGLE]", 0.5,
-        color.new(200, 200, 200), color.new(50, 42, 24))
-    utils.drawTextWithShadow(220, 230, "Brightness: " .. brightnessPercent .. "% [SQUARE]", 0.5,
-        color.new(200, 200, 200), color.new(50, 42, 24))
+
+    if not NUKE then
+        utils.drawTextWithShadow(220, 170, "CPU: " .. cpuSpeed .. " MHz [L]", 0.5, color.new(200, 200, 200),
+            color.new(50, 42, 24))
+        utils.drawTextWithShadow(220, 190, "Music: " .. (musicenabled and "On" or "Off") .. " [R]", 0.5,
+            color.new(200, 200, 200),
+            color.new(50, 42, 24))
+        utils.drawTextWithShadow(220, 210, "Basic bypass: " .. (unreliablebattery and "On" or "Off") .. " [TRIANGLE]",
+            0.5,
+            color.new(200, 200, 200), color.new(50, 42, 24))
+        utils.drawTextWithShadow(220, 230, "Brightness: " .. brightnessPercent .. "% [SQUARE]", 0.5,
+            color.new(200, 200, 200), color.new(50, 42, 24))
+    end
 
     local barMax = 80
     local barHeight = 8
@@ -480,7 +546,7 @@ while true do
     local isCharging = batt.charging()
     -- due to popular request, show it twice
     local text = "Battery: " .. pct .. "%" .. " / " .. voltage .. "V | " .. (isCharging and "charging" or "not charging")
-    utils.drawTextWithShadow(5, 260, text, 0.25, color.new(200, 200, 200), color.new(50, 42, 24))
+    utils.drawTextWithShadow(5, 260, text, 0.25, color.new(200, 200, 200), color.new(0, 0, 0)) -- 50, 42, 24
 
 
     if pct < 100 then
@@ -495,7 +561,11 @@ while true do
             local t = os.clock() * 66
             local hue = (t % 360)
             local r, g, b = utils.hsvToRgb(hue, 1, 1)
-            utils.drawTextWithShadow(290, 15, "PRESS START TO BEGIN", 0.5, color.new(r, g, b), color.new(42, 42, 24))
+            if NUKE then
+                -- we do nothing :D
+            else
+                utils.drawTextWithShadow(295, 25, "PRESS START TO BEGIN", 0.5, color.new(r, g, b), color.new(42, 42, 24))
+            end
             if buttons.start then
                 break
             end
@@ -507,7 +577,6 @@ while true do
         image.blit(steeveimg, 0, 220)
         -- STEVE
     end
-
     screen.flip()
     power.tick() -- keep the thing awake ffs :D
     os.delay(16)
@@ -523,8 +592,13 @@ buttons.homepopup(1)
 -- https://laamaa.fi/
 function laamaa()
     if not intro then
-        intro = sound.load("audio/laamaa-intro.mp3")
-        loop = sound.load("audio/laamaa-loop.mp3")
+        if NUKE then 
+            intro = sound.load("audio/NUKE/nuke-intro.mp3")
+            loop = sound.load("audio/NUKE/nuke-loop.mp3")
+        else
+            intro = sound.load("audio/laamaa-intro.mp3")
+            loop = sound.load("audio/laamaa-loop.mp3")
+        end
         sound.vol(intro, 100)
         -- so, the volume has been 70 this whole time, yeah.
         -- i literally do not know why.
@@ -620,10 +694,11 @@ while true do
     local halfG = g * 0.5
     amg.colorlight(
         1,
-        color.new(r, g, b, 255),
-        color.new(halfB, halfR, halfG, 128),
-        color.new(avgR, avgG, avgB, 192)
+        color.new(NUKE and 255 or r, NUKE and 0 or g, NUKE and 0 or b, 255),
+        color.new(NUKE and 128 or halfB, NUKE and 0 or halfR, NUKE and 0 or halfG, 128),
+        color.new(NUKE and 192 or avgR, NUKE and 0 or avgG, NUKE and 0 or avgB, 192)
     )
+
 
     currentRotation = ((currentRotation or 0) + 0.5) % 360
     local radius = 4.4
@@ -641,7 +716,7 @@ while true do
 
     model3d.render(Plane)
     model3d.startreflection(Plane, 1)
-    model3d.mirror(Ball, 1, 2)
+    model3d.mirror(Ball, 1, NUKE and 1 or 2)
     model3d.finishreflection()
 
     -- ball reflection model3d.blitshadow
@@ -758,18 +833,26 @@ while true do
             if m.pos.x < 0 or m.pos.x > 480 then
                 m.vel.x = -m.vel.x + math.random(-0.3, 0.3)
                 m.vel.y = m.vel.y + math.random(-0.2, 0.2)
-                m.colorBase = {
-                    math.random(100, 255), math.random(100, 255),
-                    math.random(100, 255)
-                }
+                if not NUKE then
+                    m.colorBase = {
+                        math.random(100, 255), math.random(100, 255),
+                        math.random(100, 255)
+                    }
+                else
+                    m.colorBase = { 255, 255, 255 }
+                end
             end
             if m.pos.y < 0 or m.pos.y > 272 then
                 m.vel.y = -m.vel.y + math.random(-0.3, 0.3)
                 m.vel.x = m.vel.x + math.random(-0.2, 0.2)
-                m.colorBase = {
-                    math.random(100, 255), math.random(100, 255),
-                    math.random(100, 255)
-                }
+                if not NUKE then
+                    m.colorBase = {
+                        math.random(100, 255), math.random(100, 255),
+                        math.random(100, 255)
+                    }
+                else
+                    m.colorBase = { 255, 255, 255 }
+                end
             end
             if math.abs(m.vel.x) < 0.5 then
                 m.vel.x = m.vel.x + math.random(-0.5, 0.5)
@@ -788,12 +871,12 @@ while true do
         end
         for _, e in ipairs(m.edges) do
             local v1, v2 = vertsM[e[1]], vertsM[e[2]]
-            draw.line(v1.x, v1.y, v2.x, v2.y,
+            draw.line(
+                v1.x, v1.y, v2.x, v2.y,
                 draw.newcolor and
-                draw.newcolor(m.colorBase[1], m.colorBase[2],
-                    m.colorBase[3]) or
-                color.new(m.colorBase[1], m.colorBase[2],
-                    m.colorBase[3]))
+                draw.newcolor(255, 255, 255) or
+                color.new(255, 255, 255)
+            )
         end
     end
 
@@ -803,8 +886,11 @@ while true do
         EqVal = calculateEquation(battPct)
     end
 
-    drawrect_ui(0, 0, 480, 20, color.new(TEST and 120 or 40,
-        TEST and 60 or 40, TEST and 60 or 40))
+    drawrect_ui(0, 0, 480, 20, color.new(
+        NUKE and 115 or (TEST and 60 or 40),
+        NUKE and 0 or (TEST and 40 or 40),
+        NUKE and 0 or (TEST and 40 or 40)
+    ))
     local tempStr
     if hw.getmodel() == "Go" then
         tempStr = ""
@@ -820,12 +906,24 @@ while true do
 
     local battLevel = math.max(0, math.min(tonumber(battPct) or 0, 100))
     local barWidth = math.floor(battLevel)
-    local colors = {
-        { color.new(50, 200, 50),  color.new(50, 180, 50),  color.new(30, 150, 30),  color.new(30, 130, 30) },
-        { color.new(200, 200, 50), color.new(180, 180, 50), color.new(150, 150, 30), color.new(130, 130, 30) },
-        { color.new(200, 50, 50),  color.new(180, 50, 50),  color.new(150, 30, 30),  color.new(130, 30, 30) }
-    }
-    local c = battLevel > 75 and colors[1] or (battLevel > 50 and colors[2] or colors[3])
+
+    local colors
+    if NUKE then
+        colors = { color.new(255, 40, 40) }
+    else
+        colors = {
+            { color.new(50, 200, 50),  color.new(50, 180, 50),  color.new(30, 150, 30),  color.new(30, 130, 30) },
+            { color.new(200, 200, 50), color.new(180, 180, 50), color.new(150, 150, 30), color.new(130, 130, 30) },
+            { color.new(200, 50, 50),  color.new(180, 50, 50),  color.new(150, 30, 30),  color.new(130, 30, 30) }
+        }
+    end
+
+    local c
+    if NUKE then
+        c = { colors[1], colors[1], colors[1], colors[1] }
+    else
+        c = battLevel > 75 and colors[1] or (battLevel > 50 and colors[2] or colors[3])
+    end
 
     drawrect_ui(5, 25, barWidth, 3, c[1], c[2], c[3], c[4])
     drawrect_ui(5 + barWidth, 25, 100 - barWidth, 3, color.new(50, 50, 50))
@@ -841,9 +939,12 @@ while true do
             color.new(50, 50, 50))
     end
 
-    drawrect_ui(0, 250, 480, 22, color.new(TEST and 120 or 40,
-        TEST and 60 or 40,
-        TEST and 40 or 40))
+    drawrect_ui(0, 250, 480, 22, color.new(
+        NUKE and 115 or (TEST and 60 or 40),
+        NUKE and 0 or (TEST and 40 or 40),
+        NUKE and 0 or (TEST and 40 or 40)
+    ))
+
 
     local hwgen = hw.gen()
     local cfw = os.cfw()

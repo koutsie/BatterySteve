@@ -10,6 +10,7 @@ do
             showmspf = true,
             extraload = false,
             unreliablebattery = false,
+            nuke=false,
         },
         autotest = {
             enabled = false
