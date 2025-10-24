@@ -32,6 +32,8 @@ local logMoveFolder = "logs"
 local lastBackup = os.time()
 local logInterval = 30
 
+local nukecolor = 0
+
 local eqA, eqB, eqD = 0.3, 0.2, 0.5
 local battPct = 100
 local battlifestimate = 0
@@ -883,7 +885,7 @@ while true do
     end
 
     drawrect_ui(0, 0, 480, 20, color.new(
-        NUKE and 64 or (TEST and 60 or 40),
+        NUKE and nukecolor or (TEST and 60 or 40),
         NUKE and 0 or (TEST and 40 or 40),
         NUKE and 0 or (TEST and 40 or 40)
     ))
@@ -936,7 +938,7 @@ while true do
     end
 
     drawrect_ui(0, 250, 480, 22, color.new(
-        NUKE and 64 or (TEST and 60 or 40),
+        NUKE and nukecolor or (TEST and 60 or 40),
         NUKE and 0 or (TEST and 40 or 40),
         NUKE and 0 or (TEST and 40 or 40)
     ))
