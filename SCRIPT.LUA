@@ -80,6 +80,25 @@ os.cpu(cpuSpeed)
 -- we have to run nc, ball.
 nc = require("modules/nc")
 nc.run()
+
+-- check if we're gonna go nuclear
+local startTime = os.clock()
+local botchcolor = color.new(0, 15, 15)
+while (os.clock() - startTime) * 1000 < 888 do
+    buttons.read()
+    if buttons.left then
+        _G.NUKE = true
+        _G.config.batterysteve.splashes = false
+        os.message("totally nuklear")
+        break
+    end
+    screen.txtcolor(botchcolor)
+    screen.consolexy(1, 1)
+    screen.consoleprint("loading.... ?")
+    screen.flip()
+    os.delay(32)
+end
+
 if TEST then BSV = BSV .. " [TEST]" end
 if NUKE then BSV = BSV .. "[NUKE]" end
 
@@ -872,7 +891,7 @@ while true do
             draw.line(
                 v1.x, v1.y, v2.x, v2.y,
                 draw.newcolor and
-                draw.newcolor(255 , 255, 255) or
+                draw.newcolor(255, 255, 255) or
                 color.new(255, 255, 255)
             )
         end
