@@ -43,21 +43,128 @@ function utils.hsvToRgb(h, s, v)
     local c, i = v * s, h * 0.016666667
     local x, m = c * (1 - math.abs(i % 2 - 1)), v - c
     i = i - i % 1
-    local rgb = (i == 0 and {c, x, 0}) or
-                (i == 1 and {x, c, 0}) or
-                (i == 2 and {0, c, x}) or
-                (i == 3 and {0, x, c}) or
-                (i == 4 and {x, 0, c}) or
-                {c, 0, x}
+    local rgb = (i == 0 and { c, x, 0 }) or
+        (i == 1 and { x, c, 0 }) or
+        (i == 2 and { 0, c, x }) or
+        (i == 3 and { 0, x, c }) or
+        (i == 4 and { x, 0, c }) or
+        { c, 0, x }
     return (rgb[1] + m) * 255,
-           (rgb[2] + m) * 255,
-           (rgb[3] + m) * 255
+        (rgb[2] + m) * 255,
+        (rgb[3] + m) * 255
 end
 
 function utils.drawTextWithShadow(x, y, text, size, color, shadowColor)
     local shadowOffset = 2
     screen.print(x + shadowOffset, y + shadowOffset, text, size, shadowColor)
     screen.print(x, y, text, size, color)
+end
+
+function utils.onethousanddebug()
+    font.setdefault()
+    local luaMemUsed = math.floor(collectgarbage("count"))
+    local osRamUsedKB = math.floor(os.ram() / 1024)
+    local osRamTotalKB = math.floor(os.totalram() / 1024)
+    local osRamPercent = math.floor((osRamUsedKB / osRamTotalKB) * 100)
+
+    local globalCount = 0
+    for _ in pairs(_G) do globalCount = globalCount + 1 end
+
+    local ballMeta = getmetatable(Ball)
+    local ballMetaType = ballMeta and (ballMeta.__name or ballMeta.__type or "has_mt") or "no_mt"
+
+    local info = debug.getinfo(2, "Slnf")
+    local funcName = info.name or "unknown"
+    local funcSource = info.short_src or "unknown"
+    local funcLine = info.currentline or 0
+    local funcLineDef = info.linedefined or 0
+    local funcWhat = info.what or "unknown"
+
+    local localCount, idx = 0, 1
+    while debug.getlocal(2, idx) do
+        localCount = localCount + 1
+        idx = idx + 1
+    end
+
+    local upvalueCount = 0
+    if info.func then
+        idx = 1
+        while debug.getupvalue(info.func, idx) do
+            upvalueCount = upvalueCount + 1
+            idx = idx + 1
+        end
+    end
+
+    local stackDepth = 0
+    while debug.getinfo(stackDepth + 1, "f") do stackDepth = stackDepth + 1 end
+
+    local registrySize = 0
+    for _ in pairs(debug.getregistry()) do registrySize = registrySize + 1 end
+
+    local hookSet = debug.gethook() and "YES" or "NO"
+    local hookMask, hookCount = "", 0
+    if hookSet == "YES" then
+        local m, c = debug.gethook()
+        hookMask = m or ""
+        hookCount = c or 0
+    end
+
+    local envTable = getfenv(2)
+    local envSize = 0
+    for _ in pairs(envTable) do envSize = envSize + 1 end
+
+    -- https://stackoverflow.com/questions/28320213/why-do-we-need-to-call-luas-collectgarbage-twice/28320364#28320364
+    collectgarbage()
+    collectgarbage()
+    local luaMemAfterGC = math.floor(collectgarbage("count"))
+    local gcThreshold = collectgarbage("setpause", 200) / 10
+
+    local traceback = debug.traceback("", 3)
+    local tbLines = 0
+    for _ in traceback:gmatch("\n") do tbLines = tbLines + 1 end
+
+    local yPos, fontSize = 30, 0.40
+    local fgColor, bgColor = color.new(200, 200, 200), color.new(0, 0, 0)
+
+    screen.print(70, yPos,
+        "LUA: " ..
+        luaMemUsed .. "KB | RAM: " .. osRamUsedKB .. "/" .. osRamTotalKB .. "KB (" ..
+        osRamPercent .. "%) | GL:" .. globalCount, fontSize, fgColor, bgColor)
+    yPos = yPos + 15
+
+    screen.print(70, yPos, "LUA POSTGC: " .. luaMemAfterGC .. "KB | FREED: " .. (luaMemUsed - luaMemAfterGC) .. "KB",
+        fontSize, fgColor, bgColor)
+    yPos = yPos + 15
+
+    screen.print(70, yPos, "Ball(s): " .. model3d.countobj(Ball) .. " | Meta: " .. ballMetaType, fontSize, fgColor,
+        bgColor)
+    yPos = yPos + 15
+
+    screen.print(70, yPos, "TYPE: " .. type(Ball) .. " | ADDR: " .. tostring(Ball), fontSize, fgColor, bgColor)
+    yPos = yPos + 15
+
+    screen.print(70, yPos, "Func: " .. funcName .. " | WHT: " .. funcWhat .. " | LN: " .. funcLine, fontSize, fgColor,
+        bgColor)
+    yPos = yPos + 15
+
+    screen.print(70, yPos, "SOURC: " .. funcSource .. " | DEFINEDAT: " .. funcLineDef, fontSize, fgColor, bgColor)
+    yPos = yPos + 15
+
+    screen.print(70, yPos, "LCL: " .. localCount .. " | UPVL: " .. upvalueCount .. " | SDPTH: " .. stackDepth, fontSize,
+        fgColor, bgColor)
+    yPos = yPos + 15
+
+    screen.print(70, yPos, "RI: " .. registrySize .. " | LUAVER: " .. tostring(_VERSION), fontSize, fgColor, bgColor)
+    yPos = yPos + 15
+
+    screen.print(70, yPos, "HOOK: " .. hookSet .. " | MASK: " .. hookMask .. " | Count: " .. hookCount, fontSize, fgColor,
+        bgColor)
+    yPos = yPos + 15
+
+    screen.print(70, yPos, "ENV: " .. envSize .. " | GC-T: " .. gcThreshold .. "KB", fontSize, fgColor, bgColor)
+    yPos = yPos + 15
+
+    screen.print(70, yPos, "tableCount: " .. tbLines .. " ", fontSize, fgColor, bgColor)
 end
 
 return utils

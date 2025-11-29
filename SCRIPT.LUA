@@ -66,7 +66,12 @@ if os.date("%d") == "01" and os.date("%m") == "04" then
     STEVE = true
 end
 TEST = false
-BSV = "1.2.6-eggy"
+BSV = "1.2.7"
+-- Hours spent fixing random issues caused by own stupidity:
+-- 29.11.2025: Two and a Half hours (2.5h)
+-- Total tally: 2.5h
+
+
 
 -- config manager
 config = require("modules/cmanager")
@@ -196,36 +201,43 @@ local d = os.date("*t")
 local m, day = d.month, d.day
 
 -- one of the things of all time:
--- Valentine's(2/14), Sonic(6/23), Summer(7/13-20), Metal Gear(8/28-31),
--- MrMario2011(8/12), Oktoberfest(9/20-10/5), Fall(10/5-12),
--- Halloween(10/25-31), God of War(11/9), Thanksgiving(11/23-29),
--- Christmas(12/8-25) & NewYear(12/26-1/1), Spring(4/20-27), Minecraft(5/17)
 local seasonal
 if m == 2 and day == 14 then
     seasonal = "steve_valentines.png"
+elseif m == 3 and day == 5 then
+    seasonal = "steve_cheese.png"
 elseif m == 4 and day >= 20 and day <= 27 then
     seasonal = "steve_spring.png"
 elseif m == 5 and day == 17 then
     seasonal = "steve_mc.png"
+elseif m == 6 and day == 6 then
+    seasonal = "steve_ris.png"
 elseif m == 6 and day == 23 then
     seasonal = "steve_sonic.png"
 elseif m == 7 and day >= 13 and day <= 20 then
     seasonal = "steve_summer.png"
 elseif m == 8 and day == 12 then
     seasonal = "steve_mrmario.png"
-    -- changed the name because its not the plumber from the popular video game series.
+elseif m == 8 and day == 25 then
+    seasonal = "steve_linux.png"
 elseif m == 8 and day >= 28 and day <= 31 then
     seasonal = "steve_mgs.png"
 elseif (m == 9 and day >= 20) or (m == 10 and day <= 5) then
-    seasonal = "steve_beer.png" -- almost forgot oktoberfest existed, shame on me...
+    seasonal = "steve_beer.png"
+elseif m == 10 and day == 16 then
+    seasonal = "steve_tax.png"
 elseif m == 10 and day >= 5 and day <= 12 then
     seasonal = "steve_fall.png"
 elseif m == 10 and day >= 25 then
     seasonal = "steve_halloween.png"
+elseif m == 11 and day == 6 then
+    seasonal = "steve_rac.png"
+elseif m == 11 and day == 11 then
+    seasonal = "steve_rac2.png"
 elseif m == 11 and day == 9 then
     seasonal = "steve_gow.png"
 elseif m == 11 and day >= 23 and day <= 29 then
-    seasonal = "steve_thanksgiving.png" -- idea by juladdr
+    seasonal = "steve_thanksgiving.png"
 elseif m == 12 and day >= 8 and day <= 25 then
     seasonal = "steve_christmas.png"
 elseif (m == 12 and day >= 26) or (m == 1 and day == 1) then
@@ -259,12 +271,28 @@ amg.perspective(46.0)
 amg.typelight(1, __DIRECTIONAL)
 amg.colorlight(1, color.new(50, 50, 50), color.new(100, 100, 100), color.new(200, 200, 200))
 amg.poslight(1, { 1, 4, 1 })
+
+-- https://stackoverflow.com/questions/28320213/why-do-we-need-to-call-luas-collectgarbage-twice/28320364#28320364
+collectgarbage()
+collectgarbage()
+
 if not NUKE then
     Plane = model3d.load(files.cdir() .. "/3d/Data/Plane/plane.obj")
 else
     Plane = model3d.load(files.cdir() .. "/3d/Data/NUKE/plane.obj")
 end
 Ball = model3d.load(files.cdir() .. "/3d/Data/Ball/ball.obj")
+
+if not Ball then
+    screen.clear(color.new(255, 0, 0))
+    screen.print(10, 10, "ERROR: MODEL LOADING FAILED", 0.5, color.new(255, 255, 255))
+    screen.print(10, 30,
+        "RAM: " .. math.floor(os.ram() / 1024 / 1024) .. "MB / " .. math.floor(os.totalram() / 1024 / 1024) .. "MB", 0.4,
+        color.new(255, 255, 255))
+    screen.flip()
+    buttons.waitforkey(__START)
+    os.exit()
+end
 
 local scaleValues = { 0.70, 0.70, 0.70 }
 model3d.scaling(Ball, 1, scaleValues)
@@ -356,6 +384,8 @@ for i = 1, particleCount do
     }
 end
 
+-- https://stackoverflow.com/questions/28320213/why-do-we-need-to-call-luas-collectgarbage-twice/28320364#28320364
+collectgarbage()
 collectgarbage()
 
 local bg_path = NUKE and "/images/nuke.png" or "/images/bg.gif"
@@ -723,28 +753,31 @@ while true do
         NUKE and color.new(128, 128, 128, 192) or color.new(avgR, avgG, avgB, 192)
     )
 
-
-    -- rotate the plane, not the fucking camera lmao
+    -- i might've goofed the rotation
     currentRotation = ((currentRotation or 0) + 0.5) % 360
-    model3d.rotation(Plane, 1, { 0, -currentRotation, 0 })
-    cam3d.eye(Camera, { 0, 0.5, 0 })
-    cam3d.position(Camera, { 3, 3, 3 })
+    local radius = 4.5
+    local camX = math.cos(math.rad(currentRotation)) * radius
+    local camZ = math.sin(math.rad(currentRotation)) * radius
+    cam3d.position(Camera, { camX, 2.5, camZ })
     cam3d.set(Camera)
 
     model3d.render(Plane)
+
+    -- AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
     model3d.startreflection(Plane, 1)
     model3d.mirror(Ball, 1, NUKE and 0 or 2)
     model3d.finishreflection()
 
-    -- ball reflection model3d.blitshadow
     model3d.render(Ball)
-    amg.light(1, 0);
-
+    amg.light(1, 0)
 
     cubeRotX = (cubeRotX + rotSpeedX) % 360
     cubeRotY = (cubeRotY + rotSpeedY) % 360
     cubeRotZ = (cubeRotZ + rotSpeedZ) % 360
 
+    -- REMOVE BEFORE SHIPPING
+    -- utils.onethousanddebug()
+    -- REMOVE BEFORE SHIPPING
     local now = os.time()
     local dt = now - lastUpdateTime
     if dt > 0 then elapsedSeconds, lastUpdateTime = elapsedSeconds + dt, now end
