@@ -5,21 +5,22 @@ local marked_targets = {}
 local target_color = color.new(180, 255, 180)
 local time_color = color.new(180, 180, 255)
 
-local function checkdata()
-            if not sec or not file then
-            local rectHeight = 272 * 0.33
-            draw.fillrect(0, rectHeight, 480, rectHeight, color.new(230, 50, 50))
-            local message = "no test data, failed!"
-            screen.print((480 - screen.textwidth(message, 1.0)) / 2, rectHeight + rectHeight / 2 - 1, message, 1.0,
-                color.new(50, 50, 50))
-            screen.flip()
-            os.delay(10000)
-            os.exit()
-        end
-end
+
+-- uuuuuuuuuuuuuuuuuuuuuuuuuuuhhhhgh????
+-- local function checkdata()
+--             if not sec or not file then
+--             local rectHeight = 272 * 0.33
+--             draw.fillrect(0, rectHeight, 480, rectHeight, color.new(230, 50, 50))
+--             local message = "no test data, failed!"
+--             screen.print((480 - screen.textwidth(message, 1.0)) / 2, rectHeight + rectHeight / 2 - 1, message, 1.0,
+--                 color.new(50, 50, 50))
+--             screen.flip()
+--             os.delay(10000)
+--             os.exit()
+--         end
+-- end
 
 local function seconds_to_hhmm(sec)
-    checkdata()
     local h, m = math.floor(sec / 3600), math.floor((sec % 3600) / 60)
     return string.format("%02dh %02dm", h, m)
 end
@@ -46,9 +47,8 @@ function graph.draw_from_file(fileName)
     local file = io.open(fileName, "r")
     if not file then
         os.message("The file: " .. fileName .. " does not exist.")
+        return
     end
-
-    checkdata() -- ???
 
     for line in file:lines() do
         local t, p, v = line:match("rt:(%d+:%d+:%d+), batt:(%d+).*bV:([%d%.]+)V")
@@ -68,6 +68,16 @@ function graph.draw_from_file(fileName)
         end
     end
     file:close()
+
+    if #times < 2 then
+        os.message("no test data, failed!?")
+        os.message("if this happens, please ping @koutsie on the PSP homebrew Discord or The TotalKommando Discord!")
+        os.message("file read: " .. fileName .. "\nentries found: " .. #times)
+        os.message("min_pct: " .. tostring(min_pct) .. "\nmax_pct: " .. tostring(max_pct))
+        screen.flip()
+        os.delay(5000)
+        return
+    end
 
     if max_pct - min_pct < 5 then
         min_pct, max_pct = math.max(0, min_pct - 3), math.min(100, max_pct + 2)
