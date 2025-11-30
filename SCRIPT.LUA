@@ -66,11 +66,11 @@ if os.date("%d") == "01" and os.date("%m") == "04" then
     STEVE = true
 end
 TEST = false
-BSV = "1.2.7"
+BSV = "1.2.8"
 -- Hours spent fixing random issues caused by own stupidity:
 -- 29.11.2025: Two and a Half hours (2.5h)
--- Total tally: 2.5h
-
+-- 30.11.2025: Four hours and fourty three minutes (4.72h)
+-- Total tally: 7.23h
 
 
 -- config manager
@@ -81,6 +81,11 @@ musicenabled = config.batterysteve.music
 unreliablebattery = config.batterysteve.unreliablebattery
 cpuSpeed = config.batterysteve.cpu
 os.cpu(cpuSpeed)
+local sysModel = hw.getmodel()
+local sysBoard = hw.board()
+local sysGen = hw.gen()
+local isPhat = sysBoard:match("^TA%-07[9-9]") or sysBoard:match("^TA%-08[1-2]") or sysBoard:match("^TA%-086")
+
 
 -- we have to run nc, ball.
 nc = require("modules/nc")
@@ -123,14 +128,49 @@ else
     }
 end
 
-local fade_steps, delay = 5, 7
+local fade_steps, delay = 7, 5
 local display_time = 5000
 
+-- ughhh bad
+if sysModel == "Vita" then
+    local duration, delay, elapsed = 8, 0.016, 0
+    local redColor = color.new(255, 30, 30)
+    local shadowColor = color.new(0, 0, 0)
+    local messages = {
+        "The PS Vita is NOT SUPPORTED!",
+        "The PS Vita is NOT SUPPORTED!",
+        "The PS Vita is NOT SUPPORTED!",
+        "The PS Vita is NOT SUPPORTED!",
+        "The PS Vita is NOT SUPPORTED!",
+        "The PS Vita is NOT SUPPORTED!",
+        "Continue at OWN DISCRETION!",
+        "",
+        "",
+        "Results may be INACCURATE!",
+        "NO ACCURACY GUARANTEES!",
+        "",
+        "",
+        "",
+        "",
+        "continuing in 8 seconds..."
+    }
 
-if hw.getmodel() == "Vita" then
-    screen.consoleprint("The PS Vita is NOT SUPPORTED!")
-    screen.flip()
-    os.delay(6500)
+    local size = 0.5
+    local lineHeight = 10 + 3
+    local startY = (240 - (#messages * lineHeight)) / 2
+
+    while elapsed < duration do
+        screen.clear(color.new(0, 0, 0))
+        for idx, msg in ipairs(messages) do
+            local textWidth = screen.textwidth(msg, size)
+            local x = (480 - textWidth) / 2
+            local y = startY + (idx - 1) * lineHeight
+            screen.print(x, y, msg, size, redColor, shadowColor)
+        end
+        screen.flip()
+        os.delay(delay * 1000)
+        elapsed = elapsed + delay
+    end
 end
 
 -- dumb but we ball
@@ -139,7 +179,7 @@ if BSV:find("-beta") then
     screen.consolexy(3, 6)
     screen.consoleprint("BatterySteve BETA build!")
     screen.consolexy(3, 8)
-    screen.consoleprint("model: " .. hw.getmodel() .. " / gen: " .. hw.gen() .. " / board: " .. hw.board())
+    screen.consoleprint("model: " .. sysModel .. " / gen: " .. sysGen .. " / board: " .. sysBoard)
     screen.consolexy(3, 9)
     screen.consoleprint("spock: " .. hw.spock() .. " / tachyon: " .. hw.tachyon())
     screen.consolexy(3, 10)
@@ -173,6 +213,8 @@ end
 
 if not BSV:find("-beta") then
     splash.show(splashes, fade_steps, delay, display_time, config)
+    splash = nil
+    splashes = nil
 end
 
 local utils = require("modules.utils")
@@ -201,6 +243,58 @@ local d = os.date("*t")
 local m, day = d.month, d.day
 
 -- one of the things of all time:
+local dateJokes = {
+    [1] = {
+        [1] = "Happy New Year! New battery, new you.",
+    },
+    [2] = {
+        [14] = "Love is in the air... and so is battery drain.",
+    },
+    [3] = {
+        [5] = "Say cheese! Battery still holding.",
+    },
+    [4] = {
+        [1] = "It's not a joke, we promise.",
+        [20] = "Spring is here, so is your battery test!",
+    },
+    [5] = {
+        [17] = "Block by block, battery by battery.",
+    },
+    [6] = {
+        [6] = "RIS day! Rise up, battery gauge!",
+        [23] = "Gotta go fast! Battery still going.",
+    },
+    [7] = {
+        [13] = "Summer vibes and battery slides.",
+    },
+    [8] = {
+        [12] = "Hey, what is going on everyone? It's me, Mr. Mario!",
+        [25] = "Free software runs on free energy (not really).",
+        [28] = "La creature... and your battery.",
+    },
+    [9] = {
+        [20] = "Spooky season battery test incoming...",
+    },
+    [10] = {
+        [5] = "Fall into battery testing season!",
+        [16] = "Tax day? More like battery gauge day.",
+        [25] = "Boo! Spooky battery readings ahead!",
+    },
+    [11] = {
+        [6] = "RAC?!",
+        [9] = "War never changes, but your battery does.",
+        [11] = "Double the trouble, double the fun!",
+        [23] = "Thankful for your battery!",
+        [30] = "One day left in November... battery still holding!",
+    },
+    [12] = {
+        [8] = "Xmas?",
+        [25] = "Happy holidays - May your battery be evergreen.",
+        [26] = "Cozy vibes and battery slides.",
+    },
+}
+local dateJoke = dateJokes[m] and dateJokes[m][day] or nil
+
 local seasonal
 if m == 2 and day == 14 then
     seasonal = "steve_valentines.png"
@@ -263,6 +357,7 @@ local function calculateEquation(b)
 end
 
 --  3d
+
 local currentRotation = 0
 amg.init()
 Camera = cam3d.new()
@@ -271,10 +366,6 @@ amg.perspective(46.0)
 amg.typelight(1, __DIRECTIONAL)
 amg.colorlight(1, color.new(50, 50, 50), color.new(100, 100, 100), color.new(200, 200, 200))
 amg.poslight(1, { 1, 4, 1 })
-
--- https://stackoverflow.com/questions/28320213/why-do-we-need-to-call-luas-collectgarbage-twice/28320364#28320364
-collectgarbage()
-collectgarbage()
 
 if not NUKE then
     Plane = model3d.load(files.cdir() .. "/3d/Data/Plane/plane.obj")
@@ -285,7 +376,7 @@ Ball = model3d.load(files.cdir() .. "/3d/Data/Ball/ball.obj")
 
 if not Ball then
     screen.clear(color.new(255, 0, 0))
-    screen.print(10, 10, "ERROR: MODEL LOADING FAILED", 0.5, color.new(255, 255, 255))
+    screen.print(10, 10, "ERROR: MODEL LOADING FAILED?", 0.5, color.new(255, 255, 255))
     screen.print(10, 30,
         "RAM: " .. math.floor(os.ram() / 1024 / 1024) .. "MB / " .. math.floor(os.totalram() / 1024 / 1024) .. "MB", 0.4,
         color.new(255, 255, 255))
@@ -294,10 +385,10 @@ if not Ball then
     os.exit()
 end
 
-local scaleValues = { 0.70, 0.70, 0.70 }
+local scaleValues = { 0.60, 0.60, 0.60 }
 model3d.scaling(Ball, 1, scaleValues)
 model3d.shading(Ball, 1)
-model3d.position(Ball, 1, { 0, 0.85, 0 })
+model3d.position(Ball, 1, { 0, 0.75, 0 })
 model3d.scaling(Plane, 1, { 0.5, 0.5, 0.5 })
 model3d.position(Plane, 1, { 0, -0.55, 0 })
 local BallRotX, BallRotY, BallRotZ = -360, 45, 32
@@ -384,10 +475,6 @@ for i = 1, particleCount do
     }
 end
 
--- https://stackoverflow.com/questions/28320213/why-do-we-need-to-call-luas-collectgarbage-twice/28320364#28320364
-collectgarbage()
-collectgarbage()
-
 local bg_path = NUKE and "/images/nuke.png" or "/images/bg.gif"
 bg = image.load(bg_path)
 image.resize(bg, 480, 272)
@@ -400,7 +487,9 @@ end
 -- lmao
 -- k
 
-
+-- https://stackoverflow.com/questions/28320213/why-do-we-need-to-call-luas-collectgarbage-twice/28320364#28320364
+collectgarbage()
+collectgarbage()
 
 -- wait for full charge
 
@@ -444,7 +533,7 @@ local brightnessMap = {
 
 
 local function getBrightnessLevelsForModel()
-    return brightnessMap[hw.board()] or { 20, 40, 60, 80, 100 }
+    return brightnessMap[sysBoard] or { 20, 40, 60, 80, 100 }
 end
 
 local brightnessLevels = getBrightnessLevelsForModel()
@@ -474,7 +563,6 @@ if current_hw_level < 1 or current_hw_level > 5 then current_hw_level = 5 end
 local brightnessIndex = current_hw_level
 local brightnessPercent = level_to_percent(brightnessIndex)
 screen.brightness(level_to_percent(brightnessIndex))
-
 
 while true do
     buttons.read()
@@ -564,13 +652,13 @@ while true do
         screen.consolexy(1, 2)
         screen.consoleprint("https://the-sauna.icu/BatterySteve/")
         screen.consolexy(1, 3)
-        screen.consoleprint(hw.getmodel() .. " / gen: " .. hw.gen() .. " / board: " .. hw.board())
+        screen.consoleprint(sysModel .. " / gen: " .. sysGen .. " / board: " .. sysBoard)
     else
         screen.txtbgcolor(color.new(0, 0, 0))
         screen.consolexy(1, 1)
         screen.consoleprint("BATTERYSTEVE " .. string.upper(BSV) .. " EDITION BY KOUTSIE")
         screen.consolexy(1, 2)
-        screen.consoleprint(string.upper(hw.getmodel() .. "  / " .. hw.board()))
+        screen.consoleprint(string.upper(sysModel .. "  / " .. sysBoard))
     end
 
 
@@ -599,6 +687,9 @@ while true do
     local voltage = batt.volt() or 0
     local isCharging = batt.charging()
     local text = "Battery: " .. pct .. "%" .. " / " .. voltage .. "V | " .. (isCharging and "charging" or "not charging")
+    if dateJoke then
+        text = text .. " | " .. dateJoke
+    end
     utils.drawTextWithShadow(10, 260, string.upper(text), 0.25, color.new(200, 200, 200), color.new(0, 0, 0))
 
     if pct < 100 then
@@ -636,9 +727,20 @@ while true do
     os.delay(16)
 end
 
-collectgarbage()
 loading()
 buttons.homepopup(1)
+
+-- let's make that 1K work
+if bg then
+    bg = nil
+end
+if steeveimg then
+    steeveimg = nil
+end
+-- https://stackoverflow.com/questions/28320213/why-do-we-need-to-call-luas-collectgarbage-twice/28320364#28320364
+collectgarbage()
+collectgarbage()
+os.delay(128)
 
 -- shoutouts to laamaa for giving me the thumbsup to use he's music
 -- go buy the track!
@@ -695,6 +797,7 @@ while true do
     if config.batterysteve.showmspf then
         FrameE = os.clock()
     end
+    -- AMG
     amg.begin()
     if musicenabled then laamaa() end
     screen.clear(color.new(20, 20, 20))
@@ -758,17 +861,20 @@ while true do
     local radius = 4.5
     local camX = math.cos(math.rad(currentRotation)) * radius
     local camZ = math.sin(math.rad(currentRotation)) * radius
-    cam3d.position(Camera, { camX, 2.5, camZ })
+    cam3d.position(Camera, { camX, 2.6, camZ })
     cam3d.set(Camera)
 
     model3d.render(Plane)
 
-    -- AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
-    model3d.startreflection(Plane, 1)
-    model3d.mirror(Ball, 1, NUKE and 0 or 2)
-    model3d.finishreflection()
+    if isPhat then
+        model3d.render(Ball)
+    else
+        model3d.startreflection(Plane, 1)
+        model3d.mirror(Ball, 1, NUKE and 0 or 2)
+        model3d.finishreflection()
 
-    model3d.render(Ball)
+        model3d.render(Ball)
+    end
     amg.light(1, 0)
 
     cubeRotX = (cubeRotX + rotSpeedX) % 360
@@ -804,7 +910,6 @@ while true do
         if musicenabled then
             sound.stop(loop)
         end
-        collectgarbage()
         local f = io.open(logFileName, "a")
         if f then
             local logMessage = "rt:" .. timeString .. ", batt:" .. battPct .. ", eq:-/-" .. ", fps:" .. fps
@@ -942,9 +1047,9 @@ while true do
         NUKE and 0 or (TEST and 40 or 40)
     ))
     local tempStr
-    if hw.getmodel() == "Go" then
+    if sysModel == "Go" then
         tempStr = ""
-    elseif hw.getmodel() == "Street" then
+    elseif sysModel == "Street" then
         tempStr = ""
     else
         tempStr = " TEMP: " .. battTemp .. "*C"
@@ -996,17 +1101,17 @@ while true do
     ))
 
 
-    local hwgen = hw.gen()
+    local hwgen = sysGen
     local cfw = os.cfw()
-    local model = (cfw ~= "UNK") and tostring(hw.getmodel() .. " on " .. cfw) or
-        tostring(hw.getmodel())
+    local model = (cfw ~= "UNK") and tostring(sysModel .. " on " .. cfw) or
+        tostring(sysModel)
     local batremain = tostring(batt.remaincap()) .. "/" ..
         tostring(batt.fullcap())
     local batvolt = batt.volt()
 
     -- if model is Go, Street or Emulator we need to hide batremain
     -- those models do not have proper battery management
-    local model = hw.getmodel()
+    local model = sysModel
 
     local batteryStr = ""
     if model ~= "Go" and model ~= "Street" and model ~= "Emulator" then
@@ -1026,7 +1131,7 @@ while true do
         if not headerWritten then
             logFile = io.open(logFileName, "w")
             if logFile then
-                local pspModel = hw.getmodel() .. "(" .. hw.gen() .. ", " .. hw.board() .. ")" or " "
+                local pspModel = sysModel .. "(" .. sysGen .. ", " .. sysBoard .. ")" or " "
                 -- also gotta add cpu frequency and screen brightness to this - done?:
                 local raw_hw_brightness = tonumber(screen.brightness()) or brightnessIndex
                 local real_hw_level = raw_hw_brightness

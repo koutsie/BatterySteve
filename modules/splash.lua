@@ -34,6 +34,8 @@ function splash.show(splashes, fade_steps, delay, display_time, config)
                     screen.flip()
                     os.delay(delay)
                 end
+                img = nil
+                collectgarbage("collect")
             end
         end
 
@@ -75,8 +77,11 @@ function splash.show(splashes, fade_steps, delay, display_time, config)
                     screen.flip()
                     os.delay(delay)
                 end
+                img = nil
+                collectgarbage("collect")
             end
         end
+        collectgarbage("collect")
     end
 end
 
