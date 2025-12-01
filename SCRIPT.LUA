@@ -2,14 +2,14 @@
 -- by Koutsie
 -- Homeage: https://the-sauna.icu/BatterySteve/
 -- Fedi/Mastodon: https://layer8.space/@k
--- Report is saved as score.old.txt
-
+-- Report is saved as score.old.txt / score.final.txt
 
 -- special thanks to:
 -- laamaa - for the banger soundtrack!
 -- nuclearkommando - ideas guy & early beta tester
 -- princessofsleeping - JP translation help
 -- krayzynez - figuring out the screen brightness per mobo issue
+-- aizawa - some better text formatting for splashes / website
 -- the entire PSP homebrew community for being awesome
 -- you - for using this software - send me your test results @koutsie on discord or mastodon (see above) !
 
@@ -66,12 +66,13 @@ if os.date("%d") == "01" and os.date("%m") == "04" then
     STEVE = true
 end
 TEST = false
-BSV = "1.2.8"
+BSV = "1.2.8-eggy-b29"
+BSVDATE = "20251201_051429"
 -- Hours spent fixing random issues caused by own stupidity:
 -- 29.11.2025: Two and a Half hours (2.5h)
 -- 30.11.2025: Four hours and fourty three minutes (4.72h)
--- Total tally: 7.23h
-
+-- 1.12.2025: Two hours and ten minutes (2.17h)
+-- Total tally: 9.39h
 
 -- config manager
 config = require("modules/cmanager")
@@ -160,7 +161,7 @@ if sysModel == "Vita" then
     local startY = (240 - (#messages * lineHeight)) / 2
 
     while elapsed < duration do
-        screen.clear(color.new(0, 0, 0))
+        screen.clear(color.new(0, 5, 30))
         for idx, msg in ipairs(messages) do
             local textWidth = screen.textwidth(msg, size)
             local x = (480 - textWidth) / 2
@@ -1142,7 +1143,7 @@ while true do
                 local brightness_for_header = level_to_percent(real_hw_level)
                 local cpufreq = os.cpu() .. "/" .. os.bus()
                 local header = string.format("BatterySteve %s on %s CPU:[%s] B:[%s%%]\n",
-                    BSV, pspModel, cpufreq, brightness_for_header)
+                    BSV .. " built " .. BSVDATE, pspModel, cpufreq, brightness_for_header)
                 logFile:write(header)
                 -- we write the header only once
                 headerWritten = true

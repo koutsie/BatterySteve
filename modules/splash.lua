@@ -43,6 +43,47 @@ function splash.show(splashes, fade_steps, delay, display_time, config)
             "images/warnings/tool.png",
             "images/warnings/capacity.png"
         }
+        -- sigh
+        local warning_texts = {
+            "Please read the following carefully!",
+            "Por favor, lea lo siguiente cuidadosamente!",
+            "Qing xin xi yue du yi xia nei rong!",
+            "Tsugi no naiyou wo yoku yonde kudasai!",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "continuing in 7 seconds...",
+        }
+
+        local p = "images/warnings/warning_for_real.png"
+        local img = image.load(p)
+        if img then
+            screen.clear(0)
+            screen.flip()
+            local start = os.time()
+            while os.time() - start < 7 do
+                image.blit(img, 0, 0, 255)
+                screen.txtcolor(color.new(255, 255, 255))
+                local console_y = 10
+                for _, warning_text in ipairs(warning_texts) do
+                    screen.consolexy(2, console_y)
+                    screen.consoleprint(warning_text)
+                    console_y = console_y + 2
+                end
+                screen.flip()
+                os.delay(delay)
+            end
+            img = nil
+            collectgarbage("collect")
+        else
+            os.message("splash failed to load: " .. p)
+        end
+
+        local no_sound = sound.load("audio/no.wav")
+
         for i = 1, #unskippable do
             local p = unskippable[i]
             local img = image.load(p)
@@ -63,6 +104,11 @@ function splash.show(splashes, fade_steps, delay, display_time, config)
                 end
                 local start = os.time()
                 while os.time() - start < custom_time do
+                    buttons.read()
+                    if buttons.cross or buttons.circle or buttons.up or buttons.down or
+                        buttons.left or buttons.right then
+                        sound.play(no_sound)
+                    end
                     image.blit(img, 0, 0, 255)
                     screen.consolexy(55, 1)
                     screen.consoleprint("Unskippable")
@@ -81,6 +127,8 @@ function splash.show(splashes, fade_steps, delay, display_time, config)
                 collectgarbage("collect")
             end
         end
+
+        no_sound = nil
         collectgarbage("collect")
     end
 end
