@@ -40,18 +40,18 @@ function utils.calculateEquation(b, eqA, eqB, eqD, constrainValue)
 end
 
 function utils.hsvToRgb(h, s, v)
+    -- possilby broken commit lol
     local c, i = v * s, h * 0.016666667
     local x, m = c * (1 - math.abs(i % 2 - 1)), v - c
     i = i - i % 1
-    local rgb = (i == 0 and { c, x, 0 }) or
-        (i == 1 and { x, c, 0 }) or
-        (i == 2 and { 0, c, x }) or
-        (i == 3 and { 0, x, c }) or
-        (i == 4 and { x, 0, c }) or
-        { c, 0, x }
-    return (rgb[1] + m) * 255,
-        (rgb[2] + m) * 255,
-        (rgb[3] + m) * 255
+    local r, g, b
+    if i == 0 then r, g, b = c, x, 0
+    elseif i == 1 then r, g, b = x, c, 0
+    elseif i == 2 then r, g, b = 0, c, x
+    elseif i == 3 then r, g, b = 0, x, c
+    elseif i == 4 then r, g, b = x, 0, c
+    else r, g, b = c, 0, x end
+    return (r + m) * 255, (g + m) * 255, (b + m) * 255
 end
 
 function utils.drawTextWithShadow(x, y, text, size, color, shadowColor)

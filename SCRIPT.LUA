@@ -66,8 +66,8 @@ if os.date("%d") == "01" and os.date("%m") == "04" then
     STEVE = true
 end
 TEST = false
-BSV = "1.2.8-eggy-b29"
-BSVDATE = "20251201_051429"
+BSV="1.2.9-b42"
+BSVDATE="20251201_172536"
 -- Hours spent fixing random issues caused by own stupidity:
 -- 29.11.2025: Two and a Half hours (2.5h)
 -- 30.11.2025: Four hours and fourty three minutes (4.72h)
@@ -390,8 +390,8 @@ local scaleValues = { 0.60, 0.60, 0.60 }
 model3d.scaling(Ball, 1, scaleValues)
 model3d.shading(Ball, 1)
 model3d.position(Ball, 1, { 0, 0.75, 0 })
-model3d.scaling(Plane, 1, { 0.5, 0.5, 0.5 })
-model3d.position(Plane, 1, { 0, -0.55, 0 })
+model3d.scaling(Plane, 1, { 0.25, 0.25, 0.25 })
+model3d.position(Plane, 1, { 0, -0.65, 0 })
 local BallRotX, BallRotY, BallRotZ = -360, 45, 32
 local BallRotSpeedX, BallRotSpeedY, BallRotSpeedZ = 0.06, 0.06, 0.045
 
@@ -492,6 +492,15 @@ end
 collectgarbage()
 collectgarbage()
 
+if files.exists("NUKED") then
+    local unreliable = require("modules/unreliable")
+    if unreliable.init(NUKE, isPhat) then
+        local utils = require("modules.utils")
+        unreliable.run(musicenabled, intro, loop, loopStarted, utils)
+        os.exit()
+    end
+end
+
 -- wait for full charge
 
 -- rahh:
@@ -565,8 +574,17 @@ local brightnessIndex = current_hw_level
 local brightnessPercent = level_to_percent(brightnessIndex)
 screen.brightness(level_to_percent(brightnessIndex))
 
+local fakeBatteryWarn = false
+
 while true do
     buttons.read()
+
+    if not fakeBatteryWarn and not batt.exists() then
+        os.message("WARNING: No battery detected!")
+        os.message("Please make sure you have a battery installed\nor enable 'unreliable battery' mode.")
+        fakeBatteryWarn = true
+    end
+
     if buttons.select then
         break
     end
@@ -801,7 +819,7 @@ while true do
     -- AMG
     amg.begin()
     if musicenabled then laamaa() end
-    screen.clear(color.new(20, 20, 20))
+    --screen.clear(color.new(20, 20, 20))
     buttons.read()
     if buttons.select and buttons.start then break end
 
@@ -840,16 +858,19 @@ while true do
 
     -- render3d
     amg.light(1, 1)
+
     local minBrightness = 148
     r = math.max(math.floor(r * 255 + 0.5), minBrightness)
     g = math.max(math.floor(g * 255 + 0.5), minBrightness)
     b = math.max(math.floor(b * 255 + 0.5), minBrightness)
+
     local avgR = math.max(math.floor((r + g) / 2 + 0.5), minBrightness)
     local avgG = math.max(math.floor((g + b) / 2 + 0.5), minBrightness)
     local avgB = math.max(math.floor((b + r) / 2 + 0.5), minBrightness)
     local halfB = b * 0.5
     local halfR = r * 0.5
     local halfG = g * 0.5
+
     amg.colorlight(
         1,
         NUKE and color.new(128, 128, 128, 255) or color.new(r, g, b, 255),
@@ -857,14 +878,14 @@ while true do
         NUKE and color.new(128, 128, 128, 192) or color.new(avgR, avgG, avgB, 192)
     )
 
-    -- i might've goofed the rotation
     currentRotation = ((currentRotation or 0) + 0.5) % 360
-    local radius = 4.5
+    local radius = 4.75
+    local ballY = 0.75
     local camX = math.cos(math.rad(currentRotation)) * radius
     local camZ = math.sin(math.rad(currentRotation)) * radius
-    cam3d.position(Camera, { camX, 2.6, camZ })
+    cam3d.position(Camera, { camX, ballY + 1.85, camZ })
+    cam3d.eye(Camera, { 0, ballY - 2, 0 })
     cam3d.set(Camera)
-
     model3d.render(Plane)
 
     if isPhat then
@@ -873,9 +894,9 @@ while true do
         model3d.startreflection(Plane, 1)
         model3d.mirror(Ball, 1, NUKE and 0 or 2)
         model3d.finishreflection()
-
         model3d.render(Ball)
     end
+
     amg.light(1, 0)
 
     cubeRotX = (cubeRotX + rotSpeedX) % 360
@@ -895,6 +916,7 @@ while true do
     local days = math.floor(elapsedSeconds / 86400)
     local timeString
     if days > 0 then
+        -- if you get a score this high, holy balls
         timeString = string.format("%d day(s) %02d:%02d:%02d", days, hour, min, sec)
     else
         timeString = string.format("%02d:%02d:%02d", hour, min, sec)

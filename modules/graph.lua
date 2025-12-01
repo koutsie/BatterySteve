@@ -156,9 +156,9 @@ function graph.draw_from_file(fileName)
         end
     end
 
-    local title = seconds_to_hhmm(max_time) .. " on BatterySteve v" .. BSV
+    local title = seconds_to_hhmm(max_time) .. " w/BatterySteve v" .. BSV
     local titleX = (480 - screen.textwidth(title, 0.7)) / 2
-    screen.print(titleX, 35, title, 0.7, color.new(255, 255, 255))
+    screen.print(titleX, 35, title, 0.60, color.new(255, 255, 255))
 
     local exitText = "Press start to exit..."
     local exitTextX = (480 - screen.textwidth(exitText, 0.4)) / 2

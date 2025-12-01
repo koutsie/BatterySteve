@@ -13,7 +13,7 @@
     end
 
     function screenie.save_screenshot()
-        os.delay(100)
+        os.delay(128)
         local screenshot_path = "screenshot.png"
         screen.shot(screenshot_path)
         os.delay(80)
