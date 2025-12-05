@@ -3,7 +3,6 @@
 -- Homeage: https://the-sauna.icu/BatterySteve/
 -- Fedi/Mastodon: https://layer8.space/@k
 -- Report is saved as score.old.txt / score.final.txt
-
 -- special thanks to:
 -- laamaa - for the banger soundtrack!
 -- nuclearkommando - ideas guy & early beta tester
@@ -12,7 +11,6 @@
 -- aizawa - some better text formatting for splashes / website
 -- the entire PSP homebrew community for being awesome
 -- you - for using this software - send me your test results @koutsie on discord or mastodon (see above) !
-
 function loading()
     screen.txtcolor(color.new(60, 30, 30))
     screen.consolexy(1, 1)
@@ -66,8 +64,8 @@ if os.date("%d") == "01" and os.date("%m") == "04" then
     STEVE = true
 end
 TEST = false
-BSV="1.2.9-b42"
-BSVDATE="20251201_172536"
+BSV="1.2.9-b43"
+BSVDATE="20251206_005134"
 -- Hours spent fixing random issues caused by own stupidity:
 -- 29.11.2025: Two and a Half hours (2.5h)
 -- 30.11.2025: Four hours and fourty three minutes (4.72h)
@@ -86,7 +84,6 @@ local sysModel = hw.getmodel()
 local sysBoard = hw.board()
 local sysGen = hw.gen()
 local isPhat = sysBoard:match("^TA%-07[9-9]") or sysBoard:match("^TA%-08[1-2]") or sysBoard:match("^TA%-086")
-
 
 -- we have to run nc, ball.
 nc = require("modules/nc")
@@ -110,8 +107,12 @@ while (os.clock() - startTime) * 1000 < 888 do
     os.delay(32)
 end
 
-if TEST then BSV = BSV .. " [TEST]" end
-if NUKE then BSV = BSV .. "[NUKE]" end
+if TEST then
+    BSV = BSV .. " [TEST]"
+end
+if NUKE then
+    BSV = BSV .. "[NUKE]"
+end
 
 -- modules
 local graph = require("modules.graph")
@@ -119,14 +120,9 @@ local screenie = require("modules.screenie")
 local splash = require("modules.splash")
 local splashes
 if NUKE then
-    splashes = { "/images/nuclear.png" }
+    splashes = {"/images/nuclear.png"}
 else
-    splashes = {
-        "/images/splash.png",
-        "/images/laamaa.png",
-        "/images/pspunk.png",
-        "/images/nuclear.png"
-    }
+    splashes = {"/images/splash.png", "/images/laamaa.png", "/images/pspunk.png", "/images/nuclear.png"}
 end
 
 local fade_steps, delay = 7, 5
@@ -137,24 +133,10 @@ if sysModel == "Vita" then
     local duration, delay, elapsed = 8, 0.016, 0
     local redColor = color.new(255, 30, 30)
     local shadowColor = color.new(0, 0, 0)
-    local messages = {
-        "The PS Vita is NOT SUPPORTED!",
-        "The PS Vita is NOT SUPPORTED!",
-        "The PS Vita is NOT SUPPORTED!",
-        "The PS Vita is NOT SUPPORTED!",
-        "The PS Vita is NOT SUPPORTED!",
-        "The PS Vita is NOT SUPPORTED!",
-        "Continue at OWN DISCRETION!",
-        "",
-        "",
-        "Results may be INACCURATE!",
-        "NO ACCURACY GUARANTEES!",
-        "",
-        "",
-        "",
-        "",
-        "continuing in 8 seconds..."
-    }
+    local messages = {"The PS Vita is NOT SUPPORTED!", "The PS Vita is NOT SUPPORTED!", "The PS Vita is NOT SUPPORTED!",
+                      "The PS Vita is NOT SUPPORTED!", "The PS Vita is NOT SUPPORTED!", "The PS Vita is NOT SUPPORTED!",
+                      "Continue at OWN DISCRETION!", "", "", "Results may be INACCURATE!", "NO ACCURACY GUARANTEES!",
+                      "", "", "", "", "continuing in 8 seconds..."}
 
     local size = 0.5
     local lineHeight = 10 + 3
@@ -188,11 +170,11 @@ if BSV:find("-beta") then
     screen.consolexy(3, 11)
     screen.consoleprint("pommel: " .. hw.pommel() .. " / baryon: " .. hw.baryon())
     screen.consolexy(3, 12)
-    screen.consoleprint("factory fw: " ..
-        hw.ofwinitial() .. " / nandseed: " .. hw.nandseed() .. " / region: " .. hw.region())
+    screen.consoleprint("factory fw: " .. hw.ofwinitial() .. " / nandseed: " .. hw.nandseed() .. " / region: " ..
+                            hw.region())
     screen.consolexy(3, 13)
-    screen.consoleprint("ram/total:" ..
-        math.floor(os.totalram() / 1024 / 1024) .. "MB / " .. math.floor(os.ram() / 1024 / 1024) .. "MB")
+    screen.consoleprint("ram/total:" .. math.floor(os.totalram() / 1024 / 1024) .. "MB / " ..
+                            math.floor(os.ram() / 1024 / 1024) .. "MB")
     screen.txtcolor(color.new(255, 255, 25))
     screen.consolexy(3, 18)
     screen.consoleprint("this is FREE software, if you paid for this - you got scammed!")
@@ -201,8 +183,7 @@ if BSV:find("-beta") then
     screen.consoleprint("Special thanks to:")
     screen.consolexy(0, 21)
     screen.consoleprint(
-        "nuclearkommando, princessofsleeping, laamaa, krayzynez \nand the rest of the psp homebrew community \n\nlets try to keep the best portable \nconsole alive!"
-    )
+        "nuclearkommando, princessofsleeping, laamaa, krayzynez \nand the rest of the psp homebrew community \n\nlets try to keep the best portable \nconsole alive!")
     screen.consolexy(0, 28)
     screen.txtcolor(color.new(12, 120, 75))
     screen.consoleprint("press start to continue")
@@ -226,14 +207,11 @@ local baseVerts = {}
 for x = -1, 1, 2 do
     for y = -1, 1, 2 do
         for z = -1, 1, 2 do
-            table.insert(baseVerts, { x * half, y * half, z * half })
+            table.insert(baseVerts, {x * half, y * half, z * half})
         end
     end
 end
-local baseEdges = {
-    { 1, 2 }, { 2, 3 }, { 3, 4 }, { 4, 1 }, { 5, 6 }, { 6, 7 }, { 7, 8 }, { 8, 5 },
-    { 1, 5 }, { 2, 6 }, { 3, 7 }, { 4, 8 }
-}
+local baseEdges = {{1, 2}, {2, 3}, {3, 4}, {4, 1}, {5, 6}, {6, 7}, {7, 8}, {8, 5}, {1, 5}, {2, 6}, {3, 7}, {4, 8}}
 
 local function rotatePoint(p, ax, ay, az)
     return utils.rotatePoint(p, ax, ay, az)
@@ -246,53 +224,53 @@ local m, day = d.month, d.day
 -- one of the things of all time:
 local dateJokes = {
     [1] = {
-        [1] = "Happy New Year! New battery, new you.",
+        [1] = "Happy New Year! New battery, new you."
     },
     [2] = {
-        [14] = "Love is in the air... and so is battery drain.",
+        [14] = "Love is in the air... and so is battery drain."
     },
     [3] = {
-        [5] = "Say cheese! Battery still holding.",
+        [5] = "Say cheese! Battery still holding."
     },
     [4] = {
         [1] = "It's not a joke, we promise.",
-        [20] = "Spring is here, so is your battery test!",
+        [20] = "Spring is here, so is your battery test!"
     },
     [5] = {
-        [17] = "Block by block, battery by battery.",
+        [17] = "Block by block, battery by battery."
     },
     [6] = {
         [6] = "RIS day! Rise up, battery gauge!",
-        [23] = "Gotta go fast! Battery still going.",
+        [23] = "Gotta go fast! Battery still going."
     },
     [7] = {
-        [13] = "Summer vibes and battery slides.",
+        [13] = "Summer vibes and battery slides."
     },
     [8] = {
         [12] = "Hey, what is going on everyone? It's me, Mr. Mario!",
         [25] = "Free software runs on free energy (not really).",
-        [28] = "La creature... and your battery.",
+        [28] = "La creature... and your battery."
     },
     [9] = {
-        [20] = "Spooky season battery test incoming...",
+        [20] = "Spooky season battery test incoming..."
     },
     [10] = {
         [5] = "Fall into battery testing season!",
         [16] = "Tax day? More like battery gauge day.",
-        [25] = "Boo! Spooky battery readings ahead!",
+        [25] = "Boo! Spooky battery readings ahead!"
     },
     [11] = {
         [6] = "RAC?!",
         [9] = "War never changes, but your battery does.",
         [11] = "Double the trouble, double the fun!",
         [23] = "Thankful for your battery!",
-        [30] = "One day left in November... battery still holding!",
+        [30] = "One day left in November... battery still holding!"
     },
     [12] = {
         [8] = "Xmas?",
         [25] = "Happy holidays - May your battery be evergreen.",
-        [26] = "Cozy vibes and battery slides.",
-    },
+        [26] = "Cozy vibes and battery slides."
+    }
 }
 local dateJoke = dateJokes[m] and dateJokes[m][day] or nil
 
@@ -366,7 +344,7 @@ amg.quality(__8888)
 amg.perspective(46.0)
 amg.typelight(1, __DIRECTIONAL)
 amg.colorlight(1, color.new(50, 50, 50), color.new(100, 100, 100), color.new(200, 200, 200))
-amg.poslight(1, { 1, 4, 1 })
+amg.poslight(1, {1, 4, 1})
 
 if not NUKE then
     Plane = model3d.load(files.cdir() .. "/3d/Data/Plane/plane.obj")
@@ -378,20 +356,19 @@ Ball = model3d.load(files.cdir() .. "/3d/Data/Ball/ball.obj")
 if not Ball then
     screen.clear(color.new(255, 0, 0))
     screen.print(10, 10, "ERROR: MODEL LOADING FAILED?", 0.5, color.new(255, 255, 255))
-    screen.print(10, 30,
-        "RAM: " .. math.floor(os.ram() / 1024 / 1024) .. "MB / " .. math.floor(os.totalram() / 1024 / 1024) .. "MB", 0.4,
-        color.new(255, 255, 255))
+    screen.print(10, 30, "RAM: " .. math.floor(os.ram() / 1024 / 1024) .. "MB / " ..
+        math.floor(os.totalram() / 1024 / 1024) .. "MB", 0.4, color.new(255, 255, 255))
     screen.flip()
     buttons.waitforkey(__START)
     os.exit()
 end
 
-local scaleValues = { 0.60, 0.60, 0.60 }
+local scaleValues = {0.60, 0.60, 0.60}
 model3d.scaling(Ball, 1, scaleValues)
 model3d.shading(Ball, 1)
-model3d.position(Ball, 1, { 0, 0.75, 0 })
-model3d.scaling(Plane, 1, { 0.25, 0.25, 0.25 })
-model3d.position(Plane, 1, { 0, -0.65, 0 })
+model3d.position(Ball, 1, {0, 0.25, 0})
+model3d.scaling(Plane, 1, {0.25, 0.25, 0.25})
+model3d.position(Plane, 1, {0, -0.65, 0})
 local BallRotX, BallRotY, BallRotZ = -360, 45, 32
 local BallRotSpeedX, BallRotSpeedY, BallRotSpeedZ = 0.06, 0.06, 0.045
 
@@ -400,62 +377,31 @@ modelmod.init(baseVerts, baseEdges, cubePosX, cubePosY, cubeRotX, cubeRotY, cube
 
 -- floaties
 if not NUKE then
-    modelmod.addModel({
-        { -30, -30, 0 }, { 0, -40, 0 }, { 30, -30, 0 }, { 40, 0, 0 },
-        { 30,  30,  0 }, { 0, 40, 0 }, { -30, 30, 0 }, { -40, 0, 0 },
-        { -20, 10, 5 }, { -10, 10, 5 }, { -10, 20, 5 }, { -20, 20, 5 },
-        { 10,  10, 5 }, { 20, 10, 5 }, { 20, 20, 5 }, { 10, 20, 5 },
-        { -20, -10, 5 }, { -10, -20, 5 }, { 10, -20, 5 }, { 20, -10, 5 }
-    }, {
-        { 1, 2 }, { 2, 3 }, { 3, 4 }, { 4, 5 }, { 5, 6 }, { 6, 7 }, { 7, 8 }, { 8, 1 },
-        { 9, 10 }, { 10, 11 }, { 11, 12 }, { 12, 9 },
-        { 13, 14 }, { 14, 15 }, { 15, 16 }, { 16, 13 },
-        { 17, 18 }, { 18, 19 }, { 19, 20 }
-    })
+    modelmod.addModel({{-30, -30, 0}, {0, -40, 0}, {30, -30, 0}, {40, 0, 0}, {30, 30, 0}, {0, 40, 0}, {-30, 30, 0},
+                       {-40, 0, 0}, {-20, 10, 5}, {-10, 10, 5}, {-10, 20, 5}, {-20, 20, 5}, {10, 10, 5}, {20, 10, 5},
+                       {20, 20, 5}, {10, 20, 5}, {-20, -10, 5}, {-10, -20, 5}, {10, -20, 5}, {20, -10, 5}},
+        {{1, 2}, {2, 3}, {3, 4}, {4, 5}, {5, 6}, {6, 7}, {7, 8}, {8, 1}, {9, 10}, {10, 11}, {11, 12}, {12, 9}, {13, 14},
+         {14, 15}, {15, 16}, {16, 13}, {17, 18}, {18, 19}, {19, 20}})
 else
-    modelmod.addModel({
-        { -22.5, -22.5, 0 }, { 0, -30, 0 }, { 22.5, -22.5, 0 }, { 30, 0, 0 },
-        { 22.5,  22.5,  0 }, { 0, 30, 0 }, { -22.5, 22.5, 0 }, { -30, 0, 0 },
-
-        { -20,    17.5, 0 }, { -2.5, 17.5, 0 },
-        { -11.25, 17.5, 0 }, { -11.25, -17.5, 0 },
-
-        { 4,  17.5, 0 }, { 4, -17.5, 0 },
-        { 4,  0,    0 },
-        { 20, 17.5, 0 }, { 20, -17.5, 0 }
-    }, {
-        { 1,  2 }, { 2, 3 }, { 3, 4 }, { 4, 5 }, { 5, 6 }, { 6, 7 }, { 7, 8 }, { 8, 1 },
-
-        { 9,  10 },
-        { 11, 12 },
-        { 13, 14 },
-        { 13, 15 },
-        { 15, 16 },
-        { 15, 17 }
-    })
+    modelmod.addModel({{-22.5, -22.5, 0}, {0, -30, 0}, {22.5, -22.5, 0}, {30, 0, 0}, {22.5, 22.5, 0}, {0, 30, 0},
+                       {-22.5, 22.5, 0}, {-30, 0, 0}, {-20, 17.5, 0}, {-2.5, 17.5, 0}, {-11.25, 17.5, 0},
+                       {-11.25, -17.5, 0}, {4, 17.5, 0}, {4, -17.5, 0}, {4, 0, 0}, {20, 17.5, 0}, {20, -17.5, 0}},
+        {{1, 2}, {2, 3}, {3, 4}, {4, 5}, {5, 6}, {6, 7}, {7, 8}, {8, 1}, {9, 10}, {11, 12}, {13, 14}, {13, 15},
+         {15, 16}, {15, 17}})
 end
 
-modelmod.addModel({
-    { 0, -30, 15 }, { 26, -15, 15 }, { 26, 15, 15 }, { 0, 30, 15 }, { -26, 15, 15 }, { -26, -15, 15 },
-    { 0, -30, -15 }, { 26, -15, -15 }, { 26, 15, -15 }, { 0, 30, -15 }, { -26, 15, -15 }, { -26, -15, -15 }
-}, {
-    { 1, 2 }, { 2, 3 }, { 3, 4 }, { 4, 5 }, { 5, 6 }, { 6, 1 },
-    { 7, 8 }, { 8, 9 }, { 9, 10 }, { 10, 11 }, { 11, 12 }, { 12, 7 },
-    { 1, 7 }, { 2, 8 }, { 3, 9 }, { 4, 10 }, { 5, 11 }, { 6, 12 }
-})
+modelmod.addModel(
+    {{0, -30, 15}, {26, -15, 15}, {26, 15, 15}, {0, 30, 15}, {-26, 15, 15}, {-26, -15, 15}, {0, -30, -15},
+     {26, -15, -15}, {26, 15, -15}, {0, 30, -15}, {-26, 15, -15}, {-26, -15, -15}},
+    {{1, 2}, {2, 3}, {3, 4}, {4, 5}, {5, 6}, {6, 1}, {7, 8}, {8, 9}, {9, 10}, {10, 11}, {11, 12}, {12, 7}, {1, 7},
+     {2, 8}, {3, 9}, {4, 10}, {5, 11}, {6, 12}})
 
 if config.batterysteve.extraload then
     for i = 1, 30 do
-        modelmod.addModel({
-            { -30, -30, 0 }, { 0, -40, 0 }, { 30, -30, 0 }, { 40, 0, 0 },
-            { 30,  30,  0 }, { 0, 40, 0 }, { -30, 30, 0 }, { -40, 0, 0 },
-            { -20, 20, 5 }, { -5, 0, 5 }, { -20, -20, 5 },
-            { 20,  20, 5 }, { 5, 0, 5 }, { 20, -20, 5 }
-        }, {
-            { 1, 2 }, { 2, 3 }, { 3, 4 }, { 4, 5 }, { 5, 6 }, { 6, 7 }, { 7, 8 }, { 8, 1 },
-            { 9, 11 }, { 10, 9 }, { 10, 11 },
-            { 12, 14 }, { 13, 12 }, { 13, 14 }
-        })
+        modelmod.addModel({{-30, -30, 0}, {0, -40, 0}, {30, -30, 0}, {40, 0, 0}, {30, 30, 0}, {0, 40, 0}, {-30, 30, 0},
+                           {-40, 0, 0}, {-20, 20, 5}, {-5, 0, 5}, {-20, -20, 5}, {20, 20, 5}, {5, 0, 5}, {20, -20, 5}},
+            {{1, 2}, {2, 3}, {3, 4}, {4, 5}, {5, 6}, {6, 7}, {7, 8}, {8, 1}, {9, 11}, {10, 9}, {10, 11}, {12, 14},
+             {13, 12}, {13, 14}})
     end
 end
 
@@ -506,61 +452,72 @@ end
 -- rahh:
 local brightnessMap = {
     -- 01g
-    ["TA-079v1"] = { 24, 40, 72, 100 },
-    ["TA-079v2"] = { 24, 40, 72, 100 },
-    ["TA-079v3"] = { 24, 40, 72, 100 },
-    ["TA-079v4"] = { 24, 40, 72, 100 },
-    ["TA-081v1"] = { 24, 40, 72, 100 },
-    ["TA-081v2"] = { 24, 40, 72, 100 },
-    ["TA-082"]   = { 24, 40, 72, 100 },
-    ["TA-086"]   = { 36, 48, 72, 92 },
-    ["TA-079v5"] = { 20, 40, 60, 80, 100 }, -- need data
+    ["TA-079v1"] = {24, 40, 72, 100},
+    ["TA-079v2"] = {24, 40, 72, 100},
+    ["TA-079v3"] = {24, 40, 72, 100},
+    ["TA-079v4"] = {24, 40, 72, 100},
+    ["TA-081v1"] = {24, 40, 72, 100},
+    ["TA-081v2"] = {24, 40, 72, 100},
+    ["TA-082"] = {24, 40, 72, 100},
+    ["TA-086"] = {36, 48, 72, 92},
+    ["TA-079v5"] = {20, 40, 60, 80, 100}, -- need data
 
     -- 02g
-    ["TA-085v1"] = { 36, 44, 56, 68 },
-    ["TA-085v2"] = { 36, 44, 56, 68 },
-    ["TA-088v2"] = { 36, 44, 56, 68 },
-    ["TA-088v3"] = { 36, 44, 56, 68 },
-    ["TA-088v1"] = { 20, 40, 60, 80, 100 }, -- need data
-    ["TA-090v1"] = { 20, 40, 60, 80, 100 }, -- need data
+    ["TA-085v1"] = {36, 44, 56, 68},
+    ["TA-085v2"] = {36, 44, 56, 68},
+    ["TA-088v2"] = {36, 44, 56, 68},
+    ["TA-088v3"] = {36, 44, 56, 68},
+    ["TA-088v1"] = {20, 40, 60, 80, 100}, -- need data
+    ["TA-090v1"] = {20, 40, 60, 80, 100}, -- need data
 
     -- 03g–09g
-    ["TA-090v2"] = { 44, 60, 72, 84 },
-    ["TA-090v3"] = { 44, 60, 72, 84 },
-    ["TA-093v1"] = { 44, 60, 72, 84 },
-    ["TA-093v2"] = { 44, 60, 72, 84 },
-    ["TA-091"]   = { 44, 60, 72, 84 },
-    ["TA-095v3"] = { 44, 60, 72, 84 },
-    ["TA-095v2"] = { 44, 60, 72, 84 },
-    ["TA-092"]   = { 20, 40, 60, 80, 100 }, -- need data
-    ["TA-095v1"] = { 20, 40, 60, 80, 100 }, -- need data
-    ["TA-095v4"] = { 20, 40, 60, 80, 100 }, -- need data
+    ["TA-090v2"] = {44, 60, 72, 84},
+    ["TA-090v3"] = {44, 60, 72, 84},
+    ["TA-093v1"] = {44, 60, 72, 84},
+    ["TA-093v2"] = {44, 60, 72, 84},
+    ["TA-091"] = {44, 60, 72, 84},
+    ["TA-095v3"] = {44, 60, 72, 84},
+    ["TA-095v2"] = {44, 60, 72, 84},
+    ["TA-092"] = {20, 40, 60, 80, 100}, -- need data
+    ["TA-095v1"] = {20, 40, 60, 80, 100}, -- need data
+    ["TA-095v4"] = {20, 40, 60, 80, 100}, -- need data
 
     -- 11g
-    ["TA-096"]   = { 32, 40, 48 },
-    ["TA-097"]   = { 32, 40, 48 },
+    ["TA-096"] = {32, 40, 48},
+    ["TA-097"] = {32, 40, 48}
 }
 
-
 local function getBrightnessLevelsForModel()
-    return brightnessMap[sysBoard] or { 20, 40, 60, 80, 100 }
+    return brightnessMap[sysBoard] or {20, 40, 60, 80, 100}
 end
 
 local brightnessLevels = getBrightnessLevelsForModel()
 
 local function level_to_percent(level)
     level = tonumber(level) or 5
-    if level < 1 then level = 1 end
-    if level > 5 then level = 5 end
+    if level < 1 then
+        level = 1
+    end
+    if level > 5 then
+        level = 5
+    end
     return brightnessLevels[level] or 100
 end
 
 local function percent_to_level(p)
     p = tonumber(p) or 100
-    if p <= 20 then return 1 end
-    if p <= 40 then return 2 end
-    if p <= 60 then return 3 end
-    if p <= 80 then return 4 end
+    if p <= 20 then
+        return 1
+    end
+    if p <= 40 then
+        return 2
+    end
+    if p <= 60 then
+        return 3
+    end
+    if p <= 80 then
+        return 4
+    end
     return 5
 end
 
@@ -568,7 +525,9 @@ local current_hw_level = tonumber(screen.brightness()) or 5
 if current_hw_level > 5 then
     current_hw_level = percent_to_level(current_hw_level)
 end
-if current_hw_level < 1 or current_hw_level > 5 then current_hw_level = 5 end
+if current_hw_level < 1 or current_hw_level > 5 then
+    current_hw_level = 5
+end
 
 local brightnessIndex = current_hw_level
 local brightnessPercent = level_to_percent(brightnessIndex)
@@ -607,7 +566,9 @@ while true do
         local fb = tonumber(screen.brightness()) or brightnessPercent
         local fl = percent_to_level(fb)
         brightnessIndex = fl + 1
-        if brightnessIndex > #brightnessLevels then brightnessIndex = 1 end
+        if brightnessIndex > #brightnessLevels then
+            brightnessIndex = 1
+        end
         screen.brightness(level_to_percent(brightnessIndex))
         brightnessPercent = level_to_percent(brightnessIndex)
         os.delay(16)
@@ -680,16 +641,13 @@ while true do
         screen.consoleprint(string.upper(sysModel .. "  / " .. sysBoard))
     end
 
-
     if not NUKE then
         utils.drawTextWithShadow(220, 170, "CPU: " .. cpuSpeed .. " MHz [L]", 0.5, color.new(200, 200, 200),
             color.new(50, 42, 24))
         utils.drawTextWithShadow(220, 190, "Music: " .. (musicenabled and "On" or "Off") .. " [R]", 0.5,
-            color.new(200, 200, 200),
-            color.new(50, 42, 24))
-        utils.drawTextWithShadow(220, 210, "Basic bypass: " .. (unreliablebattery and "On" or "Off") .. " [TRIANGLE]",
-            0.5,
             color.new(200, 200, 200), color.new(50, 42, 24))
+        utils.drawTextWithShadow(220, 210, "Basic bypass: " .. (unreliablebattery and "On" or "Off") .. " [TRIANGLE]",
+            0.5, color.new(200, 200, 200), color.new(50, 42, 24))
         utils.drawTextWithShadow(220, 230, "Brightness: " .. brightnessPercent .. "% [SQUARE]", 0.5,
             color.new(200, 200, 200), color.new(50, 42, 24))
     end
@@ -705,7 +663,8 @@ while true do
     local pct = batt.lifepercent() or 0
     local voltage = batt.volt() or 0
     local isCharging = batt.charging()
-    local text = "Battery: " .. pct .. "%" .. " / " .. voltage .. "V | " .. (isCharging and "charging" or "not charging")
+    local text = "Battery: " .. pct .. "%" .. " / " .. voltage .. "V | " ..
+                     (isCharging and "charging" or "not charging")
     if dateJoke then
         text = text .. " | " .. dateJoke
     end
@@ -714,9 +673,10 @@ while true do
     if pct < 100 then
         local chargeX, chargeY = NUKE and 225 or 220, NUKE and 183 or 110
         local forceX, forceY = NUKE and 200 or 200, NUKE and 200 or 130
-        utils.drawTextWithShadow(chargeX, chargeY, "CHARGE TO 100%", 0.6, color.new(222, 222, 222), color.new(50, 42, 24))
-        utils.drawTextWithShadow(forceX, forceY, "FORCE START [" .. pct .. "%] BY SELECT", 0.4, color.new(222, 222, 222),
+        utils.drawTextWithShadow(chargeX, chargeY, "CHARGE TO 100%", 0.6, color.new(222, 222, 222),
             color.new(50, 42, 24))
+        utils.drawTextWithShadow(forceX, forceY, "FORCE START [" .. pct .. "%] BY SELECT", 0.4,
+            color.new(222, 222, 222), color.new(50, 42, 24))
     elseif pct >= 100 then
         if isCharging then
             local unplugX, unplugY = NUKE and 213 or 220, NUKE and 90 or 140
@@ -735,7 +695,6 @@ while true do
             os.delay(16)
         end
     end
-
 
     if steeveimg then
         image.blit(steeveimg, 0, 220)
@@ -799,7 +758,6 @@ local ui_visible = true
 local ui_last_action = os.time()
 local ui_timeout = 30
 
-
 function drawrect_ui(...)
     if ui_visible then
         draw.fillrect(...)
@@ -818,13 +776,17 @@ while true do
     end
     -- AMG
     amg.begin()
-    if musicenabled then laamaa() end
-    --screen.clear(color.new(20, 20, 20))
+    if musicenabled then
+        laamaa()
+    end
+    -- screen.clear(color.new(20, 20, 20))
     buttons.read()
-    if buttons.select and buttons.start then break end
+    if buttons.select and buttons.start then
+        break
+    end
 
     local any_button = buttons.cross or buttons.circle or buttons.triangle or buttons.square or buttons.start or
-        buttons.select or buttons.l or buttons.r
+                           buttons.select or buttons.l or buttons.r
     if any_button then
         ui_visible = true
         ui_last_action = os.time()
@@ -835,7 +797,7 @@ while true do
     BallRotX = BallRotX + BallRotSpeedX
     BallRotY = BallRotY + BallRotSpeedY
     BallRotZ = BallRotZ + BallRotSpeedZ
-    model3d.rotation(Ball, 1, { BallRotX * 15, BallRotY * 15, BallRotZ * 15 })
+    model3d.rotation(Ball, 1, {BallRotX * 15, BallRotY * 15, BallRotZ * 15})
 
     o = (o + 0.5) % 360
     local h = o / 60
@@ -871,20 +833,17 @@ while true do
     local halfR = r * 0.5
     local halfG = g * 0.5
 
-    amg.colorlight(
-        1,
-        NUKE and color.new(128, 128, 128, 255) or color.new(r, g, b, 255),
+    amg.colorlight(1, NUKE and color.new(128, 128, 128, 255) or color.new(r, g, b, 255),
         NUKE and color.new(128, 128, 128, 128) or color.new(halfB, halfR, halfG, 128),
-        NUKE and color.new(128, 128, 128, 192) or color.new(avgR, avgG, avgB, 192)
-    )
+        NUKE and color.new(128, 128, 128, 192) or color.new(avgR, avgG, avgB, 192))
 
     currentRotation = ((currentRotation or 0) + 0.5) % 360
-    local radius = 4.75
+    local radius = 5.5
     local ballY = 0.75
     local camX = math.cos(math.rad(currentRotation)) * radius
     local camZ = math.sin(math.rad(currentRotation)) * radius
-    cam3d.position(Camera, { camX, ballY + 1.85, camZ })
-    cam3d.eye(Camera, { 0, ballY - 2, 0 })
+    cam3d.position(Camera, {camX, ballY + 3.35, camZ})
+    cam3d.eye(Camera, {0, ballY - 2, 0})
     cam3d.set(Camera)
     model3d.render(Plane)
 
@@ -908,7 +867,9 @@ while true do
     -- REMOVE BEFORE SHIPPING
     local now = os.time()
     local dt = now - lastUpdateTime
-    if dt > 0 then elapsedSeconds, lastUpdateTime = elapsedSeconds + dt, now end
+    if dt > 0 then
+        elapsedSeconds, lastUpdateTime = elapsedSeconds + dt, now
+    end
 
     local sec = elapsedSeconds % 60
     local min = math.floor(elapsedSeconds / 60) % 60
@@ -963,15 +924,14 @@ while true do
             buttons.waitforkey(__START)
             while true do
                 buttons.read()
-                if buttons.cross or buttons.circle or buttons.triangle or
-                    buttons.square or buttons.start or buttons.select then
+                if buttons.cross or buttons.circle or buttons.triangle or buttons.square or buttons.start or
+                    buttons.select then
                     if musicenabled then
                         sound.stop(loop)
                     end
                     if copyFile(logFileName, logFileNameFinal) then
                         os.remove(logFileName)
-                        screen.print(240, 220, "Score file backed up.", 0.4,
-                            color.new(150, 150, 150))
+                        screen.print(240, 220, "Score file backed up.", 0.4, color.new(150, 150, 150))
                         screen.flip()
                         buttons.homepopup(1)
                         os.delay(2000)
@@ -992,7 +952,10 @@ while true do
     local verts2 = {}
     for i, v in ipairs(baseVerts) do
         local r = rotatePoint(v, cubeRotX, cubeRotY, cubeRotZ)
-        verts2[i] = { x = r[1] + cubePosX, y = r[2] + cubePosY }
+        verts2[i] = {
+            x = r[1] + cubePosX,
+            y = r[2] + cubePosY
+        }
     end
     for _, e in ipairs(baseEdges) do
         local v1, v2 = verts2[e[1]], verts2[e[2]]
@@ -1003,33 +966,25 @@ while true do
     -- but i cant really touch this now, as that'd throw off the previous
     -- tests :D
     for _, m in ipairs(models) do
-        m.rot.x, m.rot.y, m.rot.z = m.rot.x + m.rotSpeed.x,
-            m.rot.y + m.rotSpeed.y,
-            m.rot.z + m.rotSpeed.z
+        m.rot.x, m.rot.y, m.rot.z = m.rot.x + m.rotSpeed.x, m.rot.y + m.rotSpeed.y, m.rot.z + m.rotSpeed.z
         if m.vel then
             m.pos.x, m.pos.y = m.pos.x + m.vel.x, m.pos.y + m.vel.y
             if m.pos.x < 0 or m.pos.x > 480 then
                 m.vel.x = -m.vel.x + math.random(-0.3, 0.3)
                 m.vel.y = m.vel.y + math.random(-0.2, 0.2)
                 if not NUKE then
-                    m.colorBase = {
-                        math.random(100, 255), math.random(100, 255),
-                        math.random(100, 255)
-                    }
+                    m.colorBase = {math.random(100, 255), math.random(100, 255), math.random(100, 255)}
                 else
-                    m.colorBase = { 255, 255, 255 }
+                    m.colorBase = {255, 255, 255}
                 end
             end
             if m.pos.y < 0 or m.pos.y > 272 then
                 m.vel.y = -m.vel.y + math.random(-0.3, 0.3)
                 m.vel.x = m.vel.x + math.random(-0.2, 0.2)
                 if not NUKE then
-                    m.colorBase = {
-                        math.random(100, 255), math.random(100, 255),
-                        math.random(100, 255)
-                    }
+                    m.colorBase = {math.random(100, 255), math.random(100, 255), math.random(100, 255)}
                 else
-                    m.colorBase = { 255, 255, 255 }
+                    m.colorBase = {255, 255, 255}
                 end
             end
             if math.abs(m.vel.x) < 0.5 then
@@ -1049,12 +1004,7 @@ while true do
         end
         for _, e in ipairs(m.edges) do
             local v1, v2 = vertsM[e[1]], vertsM[e[2]]
-            draw.line(
-                v1.x, v1.y, v2.x, v2.y,
-                draw.newcolor and
-                draw.newcolor(255, 255, 255) or
-                color.new(255, 255, 255)
-            )
+            draw.line(v1.x, v1.y, v2.x, v2.y, draw.newcolor and draw.newcolor(255, 255, 255) or color.new(255, 255, 255))
         end
     end
 
@@ -1064,11 +1014,8 @@ while true do
         EqVal = calculateEquation(battPct)
     end
 
-    drawrect_ui(0, 0, 480, 20, color.new(
-        NUKE and nukecolor or (TEST and 60 or 40),
-        NUKE and 0 or (TEST and 40 or 40),
-        NUKE and 0 or (TEST and 40 or 40)
-    ))
+    drawrect_ui(0, 0, 480, 20, color.new(NUKE and nukecolor or (TEST and 60 or 40), NUKE and 0 or (TEST and 40 or 40),
+        NUKE and 0 or (TEST and 40 or 40)))
     local tempStr
     if sysModel == "Go" then
         tempStr = ""
@@ -1078,27 +1025,24 @@ while true do
         tempStr = " TEMP: " .. battTemp .. "*C"
     end
 
-    screenprint_ui(5, 8,
-        "BATT: " .. battPct .. tempStr .. " | CPU: " .. os.cpu() .. "/" ..
-        os.bus() .. " Mhz", 0.5, color.new(200, 200, 200))
+    screenprint_ui(5, 8, "BATT: " .. battPct .. tempStr .. " | CPU: " .. os.cpu() .. "/" .. os.bus() .. " Mhz", 0.5,
+        color.new(200, 200, 200))
 
     local battLevel = math.max(0, math.min(tonumber(battPct) or 0, 100))
     local barWidth = math.floor(battLevel)
 
     local colors
     if NUKE then
-        colors = { color.new(255, 40, 40) }
+        colors = {color.new(255, 40, 40)}
     else
-        colors = {
-            { color.new(50, 200, 50),  color.new(50, 180, 50),  color.new(30, 150, 30),  color.new(30, 130, 30) },
-            { color.new(200, 200, 50), color.new(180, 180, 50), color.new(150, 150, 30), color.new(130, 130, 30) },
-            { color.new(200, 50, 50),  color.new(180, 50, 50),  color.new(150, 30, 30),  color.new(130, 30, 30) }
-        }
+        colors = {{color.new(50, 200, 50), color.new(50, 180, 50), color.new(30, 150, 30), color.new(30, 130, 30)},
+                  {color.new(200, 200, 50), color.new(180, 180, 50), color.new(150, 150, 30), color.new(130, 130, 30)},
+                  {color.new(200, 50, 50), color.new(180, 50, 50), color.new(150, 30, 30), color.new(130, 30, 30)}}
     end
 
     local c
     if NUKE then
-        c = { colors[1], colors[1], colors[1], colors[1] }
+        c = {colors[1], colors[1], colors[1], colors[1]}
     else
         c = battLevel > 75 and colors[1] or (battLevel > 50 and colors[2] or colors[3])
     end
@@ -1106,8 +1050,7 @@ while true do
     drawrect_ui(5, 25, barWidth, 3, c[1], c[2], c[3], c[4])
     drawrect_ui(5 + barWidth, 25, 100 - barWidth, 3, color.new(50, 50, 50))
 
-    screenprint_ui(5, 30,
-        string.format("LEFT: %s", batt.lifetime()), 0.25, color.new(200, 200, 200))
+    screenprint_ui(5, 30, string.format("LEFT: %s", batt.lifetime()), 0.25, color.new(200, 200, 200))
 
     if batt.charging() then
         local rectHeight = 272 * 0.33
@@ -1117,19 +1060,13 @@ while true do
             color.new(50, 50, 50))
     end
 
-    drawrect_ui(0, 250, 480, 22, color.new(
-        NUKE and nukecolor or (TEST and 60 or 40),
-        NUKE and 0 or (TEST and 40 or 40),
-        NUKE and 0 or (TEST and 40 or 40)
-    ))
-
+    drawrect_ui(0, 250, 480, 22, color.new(NUKE and nukecolor or (TEST and 60 or 40), NUKE and 0 or (TEST and 40 or 40),
+        NUKE and 0 or (TEST and 40 or 40)))
 
     local hwgen = sysGen
     local cfw = os.cfw()
-    local model = (cfw ~= "UNK") and tostring(sysModel .. " on " .. cfw) or
-        tostring(sysModel)
-    local batremain = tostring(batt.remaincap()) .. "/" ..
-        tostring(batt.fullcap())
+    local model = (cfw ~= "UNK") and tostring(sysModel .. " on " .. cfw) or tostring(sysModel)
+    local batremain = tostring(batt.remaincap()) .. "/" .. tostring(batt.fullcap())
     local batvolt = batt.volt()
 
     -- if model is Go, Street or Emulator we need to hide batremain
@@ -1144,10 +1081,8 @@ while true do
         FrameTime = os.clock() - FrameE
     end
 
-    screenprint_ui(5, 258,
-        string.format("FPS:%d RUN:%s %s| %s %s", fps, timeString,
-            batteryStr, string.upper(hwgen), string.upper(model)), 0.40,
-        color.new(200, 200, 200))
+    screenprint_ui(5, 258, string.format("FPS:%d RUN:%s %s| %s %s", fps, timeString, batteryStr, string.upper(hwgen),
+        string.upper(model)), 0.40, color.new(200, 200, 200))
 
     if os.time() - lastLog >= logInterval then
         local logFile
@@ -1161,11 +1096,13 @@ while true do
                 if raw_hw_brightness > 4 then
                     real_hw_level = percent_to_level(raw_hw_brightness)
                 end
-                if real_hw_level < 1 or real_hw_level > 4 then real_hw_level = brightnessIndex end
+                if real_hw_level < 1 or real_hw_level > 4 then
+                    real_hw_level = brightnessIndex
+                end
                 local brightness_for_header = level_to_percent(real_hw_level)
                 local cpufreq = os.cpu() .. "/" .. os.bus()
-                local header = string.format("BatterySteve %s on %s CPU:[%s] B:[%s%%]\n",
-                    BSV .. " built " .. BSVDATE, pspModel, cpufreq, brightness_for_header)
+                local header = string.format("BatterySteve %s on %s CPU:[%s] B:[%s%%]\n", BSV .. " built " .. BSVDATE,
+                    pspModel, cpufreq, brightness_for_header)
                 logFile:write(header)
                 -- we write the header only once
                 headerWritten = true
@@ -1178,13 +1115,15 @@ while true do
             local remainCap = tostring(batt and batt.remaincap() or "N/A")
             local fullCap = tostring(batt and batt.fullcap() or "N/A")
             local lifetime = tostring(batt and batt.lifetime() or "N/A")
-            logFile:write("rt:" .. timeString .. ", batt:" .. battPct .. ", eq:" ..
-                remainCap .. " /" .. fullCap .. " " .. ", bV:" ..
-                batvolt .. " v" .. ", life:" .. lifetime .. " min" .. ", fps:" .. fps .. "\n")
+            logFile:write(
+                "rt:" .. timeString .. ", batt:" .. battPct .. ", eq:" .. remainCap .. " /" .. fullCap .. " " .. ", bV:" ..
+                    batvolt .. " v" .. ", life:" .. lifetime .. " min" .. ", fps:" .. fps .. "\n")
             logFile:close()
         end
 
-        if power and power.tick then power.tick() end
+        if power and power.tick then
+            power.tick()
+        end
         lastLog = os.time()
     end
 
@@ -1199,8 +1138,7 @@ while true do
     end
     if config.batterysteve.showmspf then
         local msPerFrame = string.format("%.2f", FrameTime * 1000)
-        screenprint_ui(5, 241,
-            string.format("MS: %s", msPerFrame), 0.25, color.new(200, 200, 200))
+        screenprint_ui(5, 241, string.format("MS: %s", msPerFrame), 0.25, color.new(200, 200, 200))
     end
     amg.update()
     screen.flip()
