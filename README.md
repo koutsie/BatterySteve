@@ -1,4 +1,5 @@
 ![Warning1](https://the-sauna.icu/BatterySteve/warning1.png)
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fkoutsie%2FBatterySteve.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2Fkoutsie%2FBatterySteve?ref=badge_shield)
 
 ![Warning2](https://the-sauna.icu/BatterySteve/warning2.png)
 ## Download
@@ -53,3 +54,7 @@ For any issues or questions, you can reach out to:
 
 - `@koutsie` on Discord (or the PSP Homebrew Discord)
 - `@k@layer8.space` on the fediverse
+
+
+## License
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fkoutsie%2FBatterySteve.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2Fkoutsie%2FBatterySteve?ref=badge_large)
